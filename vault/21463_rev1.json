@@ -1,0 +1,2449 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_ZBX-DS-AULA",
+      "label": "alexanderzobnin-zabbix-datasource",
+      "description": "alexanderzobnin-zabbix-datasource",
+      "type": "datasource",
+      "pluginId": "alexanderzobnin-zabbix-datasource",
+      "pluginName": "Zabbix"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "alexanderzobnin-zabbix-datasource",
+      "name": "Zabbix",
+      "version": "4.5.1"
+    },
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.1.0"
+    },
+    {
+      "type": "panel",
+      "id": "marcusolsson-dynamictext-panel",
+      "name": "Business Text",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 16,
+      "options": {
+        "afterRender": "",
+        "content": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"stylesheet\" href=\"styles.css\">\n  <title>VM Version</title>\n</head>\n\n<body>\n  <div class=\"vm-version\">\n    <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/01/logo-zabbix-academy-removebg-preview-1-1.png\" class=\"icon\" alt=\"CPU Icon\"/>\n    <div class=\"left-section\">\n      <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/07/svgviewer-png-output.png\" class=\"icon2\" alt=\"HashiCorp Vault Icon\"/>\n      <div class=\"version-text\">HashiCorp Vault</div>\n    </div>\n    <div class=\"right-section\">\n      <span id=\"lab-text\">STATUS:</span>\n      <span id=\"version-status\">1</span>\n    </div>\n  </div>\n\n  <!-- {{{json @root}}} -->\n\n  <script src=\"script.js\"></script>\n</body>\n\n</html>",
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "styles",
+          "helpers"
+        ],
+        "externalStyles": [],
+        "helpers": "// Selecionar o elemento onde o status será inserido\r\nlet versionStatus = document.getElementById('version-status');\r\n\r\n// Verificar se o elemento foi encontrado no DOM antes de manipulá-lo\r\nif (versionStatus) {\r\n  // Atualizar o texto e a classe com base no conteúdo atual\r\n  let status = versionStatus.textContent.trim();\r\n\r\n  if (status === '1') {\r\n    versionStatus.textContent = 'Online';\r\n    versionStatus.classList.add('online');\r\n  } else if (status === '0') {\r\n    versionStatus.textContent = 'Offline';\r\n    versionStatus.classList.add('offline');\r\n  } else {\r\n    console.error('Conteúdo inválido para atualização de status.');\r\n  }\r\n} else {\r\n  console.error('Elemento #version-status não encontrado no DOM.');\r\n}\r\n",
+        "renderMode": "everyRow",
+        "styles": "body {\r\n  font-family: Arial, sans-serif;\r\n  background-color: #f4f4f4;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  height: 100vh;\r\n  margin: 0;\r\n  flex-direction: column;\r\n}\r\n\r\n.vm-version {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between;\r\n  padding: 10px 14px;\r\n  border-radius: 10px;\r\n  color: #fff;\r\n  font-size: 1.2em;\r\n  font-weight: bold;\r\n  margin-bottom: 5px;\r\n  background-image: url('https://zabbixacademy.com.br/wp-content/uploads/2024/07/fundo-banner-01.png');\r\n  background-position: center;\r\n  background-repeat: no-repeat;\r\n  background-size: cover;\r\n}\r\n\r\n.left-section {\r\n  display: flex; /* Para alinhar ícones e texto horizontalmente */\r\n  align-items: center; /* Alinhar verticalmente */\r\n}\r\n\r\n.version-text {\r\n  color: #f8f8f8;\r\n  margin-left: 10px; /* Espaço à esquerda do texto */\r\n  font-family: Arial, sans-serif;\r\n  font-size: 30px;\r\n  text-shadow: 1px 1px 20px #f7f0f0;\r\n}\r\n\r\n.right-section {\r\n  display: flex; /* Para alinhar texto horizontalmente */\r\n  align-items: center; /* Alinhar verticalmente */\r\n}\r\n\r\n#lab-text {\r\n  color: #fff;\r\n  font-weight: bold;\r\n  margin-right: 10px; /* Espaço à direita do texto */\r\n}\r\n\r\n#version-status {\r\n  font-weight: bold;\r\n}\r\n\r\n/* Estilo para status \"Online\" */\r\n#version-status.online {\r\n  color: #00ff00; /* Verde */\r\n}\r\n\r\n/* Estilo para status \"Offline\" */\r\n#version-status.offline {\r\n  color: #ff0000; /* Vermelho */\r\n}\r\n\r\n.icon {\r\n  width: 150px;\r\n  height: 60px;\r\n  margin-right: 10px; /* Espaço à direita do ícone */\r\n}\r\n\r\n.icon2 {\r\n  width: 50px;\r\n  height: 50px;\r\n  margin-left: 10px; /* Espaço à esquerda do ícone2 */\r\n}\r\n",
+        "wrap": true
+      },
+      "pluginVersion": "5.0.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "ICMPping"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Zabbixagentping": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 3
+      },
+      "id": 11,
+      "options": {
+        "afterRender": "",
+        "content": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"stylesheet\" href=\"styles.css\">\n  <title>VM Version</title>\n</head>\n\n<body>\n  <div class=\"vm-version\">\n    <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/07/cofre.gif\" class=\"icon\" alt=\"CPU Icon\"/>\n    <div class=\"version-content\">\n      <div class=\"version-number\">{{Value}}</div>\n      <div class=\"version-text\">Tokens</div>\n    </div>\n  </div>\n</body>\n\n</html>",
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "styles"
+        ],
+        "externalStyles": [],
+        "helpers": "",
+        "renderMode": "everyRow",
+        "styles": "body {\r\n  font-family: Arial, sans-serif;\r\n  background-color: #f4f4f4;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  height: 100vh;\r\n  margin: 0;\r\n  flex-direction: column;\r\n}\r\n\r\n.vm-version {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between; /* Espaço entre os itens no container */\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  color: #fff;\r\n  font-size: 1.2em;\r\n  font-weight: bold;\r\n  width: 100%; /* Ajuste a largura conforme necessário */\r\n  \r\n  /* Fundo degradê */\r\n  background: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\r\n}\r\n\r\n.icon {\r\n  width: 70px; /* Ajuste o tamanho do ícone conforme necessário */\r\n  height: 60px;\r\n  margin-right: 50px; /* Espaçamento à direita do ícone */\r\n}\r\n\r\n.version-content {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end; /* Alinha os itens do conteúdo para o lado direito */\r\n}\r\n\r\n.version-text {\r\n  color: #00ffff; /* Neon blue color for \"VM VERSION\" text */\r\n  margin-top: 0px; /* Espaçamento acima do texto */\r\n}\r\n\r\n.version-number {\r\n \r\n  padding: 1px 15px;\r\n  border: none; /* Remove a borda */\r\n  color: #fff;\r\n  margin-right: 10px; /* Espaçamento à direita do número de versão */\r\n}\r\n.info {\r\n  display: flex;\r\n  align-items: center;\r\n  background-color: #fff;\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  box-shadow: 0 0 10px rgba(0,0,0,0.1);\r\n}\r\n\r\n.info-item {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-right: 20px;\r\n}\r\n\r\n.info-value {\r\n  font-weight: bold;\r\n}\r\n",
+        "wrap": true
+      },
+      "pluginVersion": "5.0.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokens"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokens": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 3
+      },
+      "id": 21,
+      "options": {
+        "afterRender": "",
+        "content": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"stylesheet\" href=\"styles.css\">\n  <title>VM Version</title>\n</head>\n\n<body>\n  <div class=\"vm-version\">\n    <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/07/secrets-kv.gif\" class=\"icon\" alt=\"CPU Icon\"/>\n    <div class=\"version-content\">\n      <div class=\"version-number\">{{Value}}</div>\n      <div class=\"version-text\">Secrets KV</div>\n    </div>\n  </div>\n</body>\n\n</html>",
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "styles",
+          "helpers"
+        ],
+        "externalStyles": [],
+        "helpers": "// Selecionar o elemento onde o status será inserido\r\nlet versionStatus = document.getElementById('version-number');\r\n\r\n// Verificar se o elemento foi encontrado no DOM antes de manipulá-lo\r\nif (versionStatus) {\r\n  // Atualizar o texto e a classe com base no conteúdo atual\r\n  let status = versionStatus.textContent.trim();\r\n\r\n  if (status === '1') {\r\n    versionStatus.textContent = 'Online';\r\n    versionStatus.classList.add('online');\r\n  } else if (status === '0') {\r\n    versionStatus.textContent = 'Offline';\r\n    versionStatus.classList.add('offline');\r\n  } else {\r\n    console.error('Conteúdo inválido para atualização de status.');\r\n  }\r\n} else {\r\n  console.error('Elemento #version-status não encontrado no DOM.');\r\n}\r\n",
+        "renderMode": "everyRow",
+        "styles": "body {\r\n  font-family: Arial, sans-serif;\r\n  background-color: #f4f4f4;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  height: 100vh;\r\n  margin: 0;\r\n  flex-direction: column;\r\n}\r\n\r\n.vm-version {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between; /* Espaço entre os itens no container */\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  color: #fff;\r\n  font-size: 1.2em;\r\n  font-weight: bold;\r\n  width: 100%; /* Ajuste a largura conforme necessário */\r\n  \r\n  /* Fundo degradê */\r\n  background: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\r\n}\r\n\r\n.icon {\r\n  width: 70px; /* Ajuste o tamanho do ícone conforme necessário */\r\n  height: 60px;\r\n  margin-right: 50px; /* Espaçamento à direita do ícone */\r\n}\r\n\r\n.version-content {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end; /* Alinha os itens do conteúdo para o lado direito */\r\n}\r\n\r\n.version-text {\r\n  color: #00ffff; /* Neon blue color for \"VM VERSION\" text */\r\n  margin-top: 0px; /* Espaçamento acima do texto */\r\n}\r\n\r\n.version-number {\r\n \r\n  padding: 1px 30px;\r\n  border: none; /* Remove a borda */\r\n  color: #fff;\r\n  margin-right: 10px; /* Espaçamento à direita do número de versão */\r\n}\r\n.info {\r\n  display: flex;\r\n  align-items: center;\r\n  background-color: #fff;\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  box-shadow: 0 0 10px rgba(0,0,0,0.1);\r\n}\r\n\r\n.info-item {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-right: 20px;\r\n}\r\n\r\n.info-value {\r\n  font-weight: bold;\r\n}\r\n\r\n/* Estilo para status \"Online\" */\r\n#version-number.online {\r\n  color: #00ff00; /* Verde */\r\n}\r\n\r\n/* Estilo para status \"Offline\" */\r\n#version-number.offline {\r\n  color: #ff0000; /* Vermelho */\r\n}",
+        "wrap": true
+      },
+      "pluginVersion": "5.0.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Secret_KVs"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Secret_KVs": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Secretkventries": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Standby": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 3
+      },
+      "id": 22,
+      "options": {
+        "afterRender": "",
+        "content": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"stylesheet\" href=\"styles.css\">\n  <title>VM Version</title>\n</head>\n\n<body>\n  <div class=\"vm-version\">\n    <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/07/policy.gif\" class=\"icon\" alt=\"CPU Icon\"/>\n    <div class=\"version-content\">\n      <div class=\"version-number\">{{Value}}</div>\n      <div class=\"version-text\">Policys</div>\n    </div>\n  </div>\n</body>\n\n</html>",
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "styles"
+        ],
+        "externalStyles": [],
+        "helpers": "",
+        "renderMode": "everyRow",
+        "styles": "body {\r\n  font-family: Arial, sans-serif;\r\n  background-color: #f4f4f4;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  height: 100vh;\r\n  margin: 0;\r\n  flex-direction: column;\r\n}\r\n\r\n.vm-version {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between; /* Espaço entre os itens no container */\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  color: #fff;\r\n  font-size: 1.2em;\r\n  font-weight: bold;\r\n  width: 100%; /* Ajuste a largura conforme necessário */\r\n  \r\n  /* Fundo degradê */\r\n  background: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\r\n}\r\n\r\n.icon {\r\n  width: 70px; /* Ajuste o tamanho do ícone conforme necessário */\r\n  height: 60px;\r\n  margin-right: 50px; /* Espaçamento à direita do ícone */\r\n}\r\n\r\n.version-content {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end; /* Alinha os itens do conteúdo para o lado direito */\r\n}\r\n\r\n.version-text {\r\n  color: #00ffff; /* Neon blue color for \"VM VERSION\" text */\r\n  margin-top: 0px; /* Espaçamento acima do texto */\r\n}\r\n\r\n.version-number {\r\n \r\n  padding: 1px 15px;\r\n  border: none; /* Remove a borda */\r\n  color: #fff;\r\n  margin-right: 10px; /* Espaçamento à direita do número de versão */\r\n}\r\n.info {\r\n  display: flex;\r\n  align-items: center;\r\n  background-color: #fff;\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  box-shadow: 0 0 10px rgba(0,0,0,0.1);\r\n}\r\n\r\n.info-item {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-right: 20px;\r\n}\r\n\r\n.info-value {\r\n  font-weight: bold;\r\n}\r\n",
+        "wrap": true
+      },
+      "pluginVersion": "5.0.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Policys"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Policys": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencountbypolicytotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 3
+      },
+      "id": 23,
+      "options": {
+        "afterRender": "",
+        "content": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <link rel=\"stylesheet\" href=\"styles.css\">\n  <title>VM Version</title>\n</head>\n\n<body>\n  <div class=\"vm-version\">\n    <img src=\"https://zabbixacademy.com.br/wp-content/uploads/2024/07/unseal.gif\" class=\"icon\" alt=\"CPU Icon\"/>\n    <div class=\"version-content\">\n      <div class=\"version-number\">{{Value}}</div>\n      <div class=\"version-text\">Unseal</div>\n    </div>\n  </div>\n</body>\n\n</html>",
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "styles"
+        ],
+        "externalStyles": [],
+        "helpers": "",
+        "renderMode": "everyRow",
+        "styles": "body {\r\n  font-family: Arial, sans-serif;\r\n  background-color: #f4f4f4;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  height: 100vh;\r\n  margin: 0;\r\n  flex-direction: column;\r\n}\r\n\r\n.vm-version {\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: space-between; /* Espaço entre os itens no container */\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  color: #fff;\r\n  font-size: 1.2em;\r\n  font-weight: bold;\r\n  width: 100%; /* Ajuste a largura conforme necessário */\r\n  \r\n  /* Fundo degradê */\r\n  background: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\r\n}\r\n\r\n.icon {\r\n  width: 70px; /* Ajuste o tamanho do ícone conforme necessário */\r\n  height: 60px;\r\n  margin-right: 50px; /* Espaçamento à direita do ícone */\r\n}\r\n\r\n.version-content {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end; /* Alinha os itens do conteúdo para o lado direito */\r\n}\r\n\r\n.version-text {\r\n  color: #00ffff; /* Neon blue color for \"VM VERSION\" text */\r\n  margin-top: 0px; /* Espaçamento acima do texto */\r\n}\r\n\r\n.version-number {\r\n \r\n  padding: 1px 15px;\r\n  border: none; /* Remove a borda */\r\n  color: #fff;\r\n  margin-right: 10px; /* Espaçamento à direita do número de versão */\r\n}\r\n.info {\r\n  display: flex;\r\n  align-items: center;\r\n  background-color: #fff;\r\n  padding: 10px 20px;\r\n  border-radius: 10px;\r\n  box-shadow: 0 0 10px rgba(0,0,0,0.1);\r\n}\r\n\r\n.info-item {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-right: 20px;\r\n}\r\n\r\n.info-value {\r\n  font-weight: bold;\r\n}\r\n",
+        "wrap": true
+      },
+      "pluginVersion": "5.0.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Unseals"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Unsealcounter": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Unseals": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 24,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"\ndisplay: flex;\nalign-items: center;\njustify-content: space-between;\nfont-size: 20px;\nfont-family: Impact;\nborder-radius: 0px 50px 0px 50px;\nbackground: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\npadding: 02px;\">\n\n\n\n    <div style=\"text-align: center; flex-grow: 1;\">\n      <span style=\"color: white;\">VALUE</span>\n      <span style=\"color: #0047AB;\">|</span>\n      <span style=\"color: white;\">Tokens - Secret KVs</span>\n    </div> \n\n\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokencounttotal"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 26,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"\ndisplay: flex;\nalign-items: center;\njustify-content: space-between;\nfont-size: 20px;\nfont-family: Impact;\nborder-radius: 0px 50px 0px 50px;\nbackground: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\npadding: 02px;\">\n\n\n\n    <div style=\"text-align: center; flex-grow: 1;\">\n      <span style=\"color: white;\">VALUE</span>\n      <span style=\"color: #0047AB;\">|</span>\n      <span style=\"color: white;\">Policys - Unseals</span>\n    </div> \n\n\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokencounttotal"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 57,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 25,
+      "options": {
+        "barRadius": 0.5,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "6.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokens"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Secret_KVs"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "joinByLabels",
+          "options": {
+            "join": [
+              "host"
+            ],
+            "value": "item"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 57,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 28,
+      "options": {
+        "barRadius": 0.5,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "6.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Policys"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Unseals"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "joinByLabels",
+          "options": {
+            "join": [
+              "host"
+            ],
+            "value": "item"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 14,
+        "x": 0,
+        "y": 13
+      },
+      "id": 29,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"\ndisplay: flex;\nalign-items: center;\njustify-content: space-between;\nfont-size: 20px;\nfont-family: Impact;\nborder-radius: 0px 50px 0px 50px;\nbackground: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\npadding: 02px;\">\n\n\n\n    <div style=\"text-align: center; flex-grow: 1;\">\n      <span style=\"color: white;\">VALUE</span>\n      <span style=\"color: #0047AB;\">|</span>\n      <span style=\"color: white;\">CPU - Memory</span>\n    </div> \n\n\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokencounttotal"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 10,
+        "x": 14,
+        "y": 13
+      },
+      "id": 30,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"\ndisplay: flex;\nalign-items: center;\njustify-content: space-between;\nfont-size: 20px;\nfont-family: Impact;\nborder-radius: 0px 50px 0px 50px;\nbackground: linear-gradient(100deg, rgba(0, 35, 187, 0.133) 40%, rgb(21, 27, 201) 60%);\npadding: 02px;\">\n\n\n\n    <div style=\"text-align: center; flex-grow: 1;\">\n      <span style=\"color: white;\">VALUE</span>\n      <span style=\"color: #0047AB;\">|</span>\n      <span style=\"color: white;\">Tokens - Counts</span>\n    </div> \n\n\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Tokencounttotal"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "CPUutilization": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "ICMPping": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Tokencounttotal": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 57,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 10,
+        "x": 0,
+        "y": 15
+      },
+      "id": 31,
+      "options": {
+        "barRadius": 0.5,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "6.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Runtime allocated bytes"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Process resident memory"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Runtime sys bytes"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "joinByLabels",
+          "options": {
+            "join": [
+              "host"
+            ],
+            "value": "item"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 10,
+        "y": 15
+      },
+      "id": 32,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "6.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Runtime allocated bytes"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Process resident memory"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "hide": false,
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "Runtime sys bytes"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "joinByLabels",
+          "options": {
+            "join": [
+              "host"
+            ],
+            "value": "item"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ZBX-DS-AULA}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 57,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 10,
+        "x": 14,
+        "y": 15
+      },
+      "id": 33,
+      "options": {
+        "barRadius": 0.5,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "6.1.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ZBX-DS-AULA}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "zabbix_servers"
+          },
+          "host": {
+            "filter": "Vault HashiCorp"
+          },
+          "item": {
+            "filter": "/Token count/"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 12,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "joinByLabels",
+          "options": {
+            "join": [
+              "host"
+            ],
+            "value": "item"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "114 - Dashboard HashiCorp Vault",
+  "uid": "adqzoa1t0bawwd",
+  "version": 47,
+  "weekStart": "",
+  "gnetId": 21463,
+  "description": "Material do curso Zabbix 7.0 Academy: Application and Network Monitoring.\r\n\r\nhttps://zabbixacademy.com.br/"
+}
