@@ -1,0 +1,522 @@
+{
+2  "annotations": {
+3    "list": [
+4      {
+5        "builtIn": 1,
+6        "datasource": {
+7          "type": "grafana",
+8          "uid": "-- Grafana --"
+9        },
+10        "enable": true,
+11        "hide": true,
+12        "iconColor": "rgba(0, 211, 255, 1)",
+13        "name": "Annotations & Alerts",
+14        "type": "dashboard"
+15      }
+16    ]
+17  },
+18  "description": "request rate, error rate, duration",
+19  "editable": true,
+20  "fiscalYearStartMonth": 0,
+21  "graphTooltip": 0,
+22  "links": [],
+23  "liveNow": false,
+24  "panels": [
+25    {
+26      "datasource": {
+27        "type": "datasource",
+28        "uid": "grafana"
+29      },
+30      "description": "",
+31      "gridPos": {
+32        "h": 5,
+33        "w": 12,
+34        "x": 0,
+35        "y": 0
+36      },
+37      "id": 6,
+38      "options": {
+39        "code": {
+40          "language": "plaintext",
+41          "showLineNumbers": false,
+42          "showMiniMap": false
+43        },
+44        "content": "# RED Metrics: (r)equest rate, (e)rror rate, (d)uration\n\nThis dashboard uses exponential histograms and the stable [OpenTelemetry metrics semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/metrics/).\nTo enable this for the [OpenTelemetry Java instrumentation agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/), set the following environment variables:\n\n```\nexport OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION=base2_exponential_bucket_histogram\nexport OTEL_SEMCONV_STABILITY_OPT_IN=http\n```",
+45        "mode": "markdown"
+46      },
+47      "pluginVersion": "10.3.3",
+48      "type": "text"
+49    },
+50    {
+51      "datasource": {
+52        "type": "prometheus",
+53        "uid": "prometheus"
+54      },
+55      "fieldConfig": {
+56        "defaults": {
+57          "color": {
+58            "mode": "palette-classic"
+59          },
+60          "custom": {
+61            "axisBorderShow": false,
+62            "axisCenteredZero": false,
+63            "axisColorMode": "text",
+64            "axisLabel": "",
+65            "axisPlacement": "auto",
+66            "barAlignment": 0,
+67            "drawStyle": "line",
+68            "fillOpacity": 0,
+69            "gradientMode": "none",
+70            "hideFrom": {
+71              "legend": false,
+72              "tooltip": false,
+73              "viz": false
+74            },
+75            "insertNulls": false,
+76            "lineInterpolation": "linear",
+77            "lineWidth": 1,
+78            "pointSize": 5,
+79            "scaleDistribution": {
+80              "type": "linear"
+81            },
+82            "showPoints": "auto",
+83            "spanNulls": false,
+84            "stacking": {
+85              "group": "A",
+86              "mode": "none"
+87            },
+88            "thresholdsStyle": {
+89              "mode": "off"
+90            }
+91          },
+92          "mappings": [],
+93          "min": 0,
+94          "thresholds": {
+95            "mode": "absolute",
+96            "steps": [
+97              {
+98                "color": "green",
+99                "value": null
+100              },
+101              {
+102                "color": "red",
+103                "value": 80
+104              }
+105            ]
+106          },
+107          "unit": "reqps",
+108          "unitScale": true
+109        },
+110        "overrides": []
+111      },
+112      "gridPos": {
+113        "h": 8,
+114        "w": 12,
+115        "x": 0,
+116        "y": 5
+117      },
+118      "id": 1,
+119      "options": {
+120        "legend": {
+121          "calcs": [],
+122          "displayMode": "list",
+123          "placement": "bottom",
+124          "showLegend": true
+125        },
+126        "tooltip": {
+127          "mode": "single",
+128          "sort": "none"
+129        }
+130      },
+131      "targets": [
+132        {
+133          "datasource": {
+134            "type": "prometheus",
+135            "uid": "prometheus"
+136          },
+137          "editorMode": "code",
+138          "expr": "sum(histogram_count(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\", job=~\"$job\", instance=~\"$instance\"}[5m])))",
+139          "legendFormat": "__auto",
+140          "range": true,
+141          "refId": "A"
+142        }
+143      ],
+144      "title": "Request Rate",
+145      "type": "timeseries"
+146    },
+147    {
+148      "datasource": {
+149        "type": "prometheus",
+150        "uid": "prometheus"
+151      },
+152      "fieldConfig": {
+153        "defaults": {
+154          "color": {
+155            "mode": "palette-classic"
+156          },
+157          "custom": {
+158            "axisBorderShow": false,
+159            "axisCenteredZero": false,
+160            "axisColorMode": "text",
+161            "axisLabel": "",
+162            "axisPlacement": "auto",
+163            "barAlignment": 0,
+164            "drawStyle": "line",
+165            "fillOpacity": 0,
+166            "gradientMode": "none",
+167            "hideFrom": {
+168              "legend": false,
+169              "tooltip": false,
+170              "viz": false
+171            },
+172            "insertNulls": false,
+173            "lineInterpolation": "linear",
+174            "lineWidth": 1,
+175            "pointSize": 5,
+176            "scaleDistribution": {
+177              "type": "linear"
+178            },
+179            "showPoints": "auto",
+180            "spanNulls": false,
+181            "stacking": {
+182              "group": "A",
+183              "mode": "none"
+184            },
+185            "thresholdsStyle": {
+186              "mode": "off"
+187            }
+188          },
+189          "mappings": [],
+190          "min": 0,
+191          "thresholds": {
+192            "mode": "absolute",
+193            "steps": [
+194              {
+195                "color": "green",
+196                "value": null
+197              },
+198              {
+199                "color": "red",
+200                "value": 80
+201              }
+202            ]
+203          },
+204          "unit": "percentunit",
+205          "unitScale": true
+206        },
+207        "overrides": []
+208      },
+209      "gridPos": {
+210        "h": 8,
+211        "w": 12,
+212        "x": 0,
+213        "y": 13
+214      },
+215      "id": 2,
+216      "options": {
+217        "legend": {
+218          "calcs": [],
+219          "displayMode": "list",
+220          "placement": "bottom",
+221          "showLegend": true
+222        },
+223        "tooltip": {
+224          "mode": "single",
+225          "sort": "none"
+226        }
+227      },
+228      "targets": [
+229        {
+230          "datasource": {
+231            "type": "prometheus",
+232            "uid": "prometheus"
+233          },
+234          "editorMode": "code",
+235          "expr": "sum(histogram_count(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\", job=~\"$job\", instance=~\"$instance\", http_response_status_code=~\"5..\"}[5m]))) / sum(histogram_count(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\", job=~\"$job\", instance=~\"$instance\"}[5m])))\n\n",
+236          "legendFormat": "__auto",
+237          "range": true,
+238          "refId": "A"
+239        }
+240      ],
+241      "title": "Error Rate",
+242      "type": "timeseries"
+243    },
+244    {
+245      "datasource": {
+246        "type": "prometheus",
+247        "uid": "prometheus"
+248      },
+249      "fieldConfig": {
+250        "defaults": {
+251          "custom": {
+252            "hideFrom": {
+253              "legend": false,
+254              "tooltip": false,
+255              "viz": false
+256            },
+257            "scaleDistribution": {
+258              "type": "linear"
+259            }
+260          },
+261          "unitScale": true
+262        },
+263        "overrides": []
+264      },
+265      "gridPos": {
+266        "h": 8,
+267        "w": 12,
+268        "x": 0,
+269        "y": 21
+270      },
+271      "id": 5,
+272      "options": {
+273        "calculate": false,
+274        "cellGap": 1,
+275        "color": {
+276          "exponent": 0.5,
+277          "fill": "dark-orange",
+278          "mode": "scheme",
+279          "reverse": false,
+280          "scale": "exponential",
+281          "scheme": "Oranges",
+282          "steps": 64
+283        },
+284        "exemplars": {
+285          "color": "rgba(255,0,255,0.7)"
+286        },
+287        "filterValues": {
+288          "le": 1e-9
+289        },
+290        "legend": {
+291          "show": true
+292        },
+293        "rowsFrame": {
+294          "layout": "auto"
+295        },
+296        "tooltip": {
+297          "mode": "single",
+298          "showColorScale": false,
+299          "yHistogram": false
+300        },
+301        "yAxis": {
+302          "axisPlacement": "left",
+303          "reverse": false,
+304          "unit": "s"
+305        }
+306      },
+307      "pluginVersion": "10.3.3",
+308      "targets": [
+309        {
+310          "datasource": {
+311            "type": "prometheus",
+312            "uid": "prometheus"
+313          },
+314          "editorMode": "code",
+315          "exemplar": true,
+316          "expr": "sum(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\",job=~\"$job\", instance=~\"$instance\"}[5m]))",
+317          "format": "time_series",
+318          "instant": false,
+319          "range": true,
+320          "refId": "A"
+321        }
+322      ],
+323      "title": "Duration Heatmap",
+324      "type": "heatmap"
+325    },
+326    {
+327      "datasource": {
+328        "type": "prometheus",
+329        "uid": "prometheus"
+330      },
+331      "fieldConfig": {
+332        "defaults": {
+333          "color": {
+334            "mode": "palette-classic"
+335          },
+336          "custom": {
+337            "axisBorderShow": false,
+338            "axisCenteredZero": false,
+339            "axisColorMode": "text",
+340            "axisLabel": "",
+341            "axisPlacement": "auto",
+342            "barAlignment": 0,
+343            "drawStyle": "line",
+344            "fillOpacity": 0,
+345            "gradientMode": "none",
+346            "hideFrom": {
+347              "legend": false,
+348              "tooltip": false,
+349              "viz": false
+350            },
+351            "insertNulls": false,
+352            "lineInterpolation": "linear",
+353            "lineWidth": 1,
+354            "pointSize": 5,
+355            "scaleDistribution": {
+356              "type": "linear"
+357            },
+358            "showPoints": "auto",
+359            "spanNulls": false,
+360            "stacking": {
+361              "group": "A",
+362              "mode": "none"
+363            },
+364            "thresholdsStyle": {
+365              "mode": "off"
+366            }
+367          },
+368          "mappings": [],
+369          "min": 0,
+370          "thresholds": {
+371            "mode": "absolute",
+372            "steps": [
+373              {
+374                "color": "green",
+375                "value": null
+376              },
+377              {
+378                "color": "red",
+379                "value": 80
+380              }
+381            ]
+382          },
+383          "unit": "s",
+384          "unitScale": true
+385        },
+386        "overrides": []
+387      },
+388      "gridPos": {
+389        "h": 8,
+390        "w": 12,
+391        "x": 0,
+392        "y": 29
+393      },
+394      "id": 4,
+395      "options": {
+396        "legend": {
+397          "calcs": [],
+398          "displayMode": "list",
+399          "placement": "bottom",
+400          "showLegend": true
+401        },
+402        "tooltip": {
+403          "mode": "single",
+404          "sort": "none"
+405        }
+406      },
+407      "pluginVersion": "9.5.1",
+408      "targets": [
+409        {
+410          "datasource": {
+411            "type": "prometheus",
+412            "uid": "prometheus"
+413          },
+414          "editorMode": "code",
+415          "exemplar": true,
+416          "expr": "histogram_quantile(0.95, sum(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\",job=~\"$job\", instance=~\"$instance\"}[5m])))",
+417          "format": "time_series",
+418          "instant": false,
+419          "legendFormat": "95th",
+420          "range": true,
+421          "refId": "A"
+422        },
+423        {
+424          "datasource": {
+425            "type": "prometheus",
+426            "uid": "prometheus"
+427          },
+428          "editorMode": "code",
+429          "exemplar": true,
+430          "expr": "histogram_quantile(0.5, sum(rate({__name__=~\"http_server_request_duration_seconds|http_server_request_duration|http_server_duration_milliseconds|http_server_duration_seconds|http_server_duration\",job=~\"$job\", instance=~\"$instance\"}[5m])))",
+431          "hide": false,
+432          "legendFormat": "50th",
+433          "range": true,
+434          "refId": "B"
+435        }
+436      ],
+437      "title": "Duration percentiles",
+438      "type": "timeseries"
+439    }
+440  ],
+441  "refresh": "",
+442  "schemaVersion": 39,
+443  "tags": [],
+444  "templating": {
+445    "list": [
+446      {
+447        "allValue": ".+",
+448        "current": {
+449          "selected": true,
+450          "text": [
+451            "All"
+452          ],
+453          "value": [
+454            "$__all"
+455          ]
+456        },
+457        "datasource": {
+458          "type": "prometheus",
+459          "uid": "prometheus"
+460        },
+461        "definition": "label_values(job)",
+462        "hide": 0,
+463        "includeAll": true,
+464        "label": "",
+465        "multi": true,
+466        "name": "job",
+467        "options": [],
+468        "query": {
+469          "query": "label_values(job)",
+470          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+471        },
+472        "refresh": 1,
+473        "regex": "",
+474        "skipUrlSync": false,
+475        "sort": 0,
+476        "type": "query"
+477      },
+478      {
+479        "allValue": ".+",
+480        "current": {
+481          "selected": true,
+482          "text": [
+483            "All"
+484          ],
+485          "value": [
+486            "$__all"
+487          ]
+488        },
+489        "datasource": {
+490          "type": "prometheus",
+491          "uid": "prometheus"
+492        },
+493        "definition": "label_values({job=~\"$job\"},instance)",
+494        "hide": 0,
+495        "includeAll": true,
+496        "label": "instance",
+497        "multi": true,
+498        "name": "instance",
+499        "options": [],
+500        "query": {
+501          "query": "label_values({job=~\"$job\"},instance)",
+502          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+503        },
+504        "refresh": 1,
+505        "regex": "",
+506        "skipUrlSync": false,
+507        "sort": 0,
+508        "type": "query"
+509      }
+510    ]
+511  },
+512  "time": {
+513    "from": "now-30m",
+514    "to": "now"
+515  },
+516  "timepicker": {},
+517  "timezone": "",
+518  "title": "RED Metrics (native histogram)",
+519  "uid": "f543a537-cb96-470d-a349-660ad1513135",
+520  "version": 1,
+521  "weekStart": ""
+522}
