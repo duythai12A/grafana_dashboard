@@ -1,0 +1,166 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROM",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "title": "DataHub Actions – Overview",
+  "tags": ["datahub","actions","kafka","python"],
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "pipeline",
+        "type": "query",
+        "datasource": "${DS_PROM}",
+        "query": "label_values(kafka_messages_total, pipeline_name)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      },
+      {
+        "name": "topic",
+        "type": "query",
+        "datasource": "${DS_PROM}",
+        "query": "label_values(kafka_offset{pipeline_name=~\"$pipeline\"}, topic)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Uptime (h)",
+      "gridPos": {"x":0,"y":0,"w":4,"h":4},
+      "options": {"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"(time() - process_start_time_seconds)/3600","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}],
+      "fieldConfig":{"defaults":{"unit":"h"}}
+    },
+    {
+      "type": "stat",
+      "title": "CPU (s)",
+      "gridPos": {"x":4,"y":0,"w":4,"h":4},
+      "options": {"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"process_cpu_seconds_total","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}],
+      "fieldConfig":{"defaults":{"unit":"s"}}
+    },
+    {
+      "type": "stat",
+      "title": "RSS Memory",
+      "gridPos": {"x":8,"y":0,"w":4,"h":4},
+      "options": {"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"process_resident_memory_bytes","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}],
+      "fieldConfig":{"defaults":{"unit":"bytes"}}
+    },
+    {
+      "type": "stat",
+      "title": "Open FDs",
+      "gridPos": {"x":12,"y":0,"w":4,"h":4},
+      "options": {"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"process_open_fds","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}]
+    },
+    {
+      "type": "stat",
+      "title": "Python",
+      "gridPos": {"x":16,"y":0,"w":8,"h":4},
+      "options": {"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"python_info","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}],
+      "fieldConfig":{"defaults":{"displayName":"${__field.labels.version} (${__field.labels.implementation})"}} 
+    },
+
+    {
+      "type":"timeseries",
+      "title":"Messages /s (by pipeline)",
+      "gridPos":{"x":0,"y":4,"w":12,"h":8},
+      "fieldConfig":{"defaults":{"unit":"ops"}},
+      "targets":[
+        {
+          "expr":"sum by (pipeline_name) (rate(kafka_messages_total{pipeline_name=~\"$pipeline\"}[1m]))",
+          "legendFormat":"{{pipeline_name}}",
+          "refId":"A",
+          "datasource":{"type":"prometheus","uid":"${DS_PROM}"}
+        }
+      ]
+    },
+    {
+      "type":"timeseries",
+      "title":"Kafka Offsets (topic/partition)",
+      "gridPos":{"x":12,"y":4,"w":12,"h":8},
+      "targets":[
+        {
+          "expr":"sum by (topic,partition,pipeline_name) (kafka_offset{pipeline_name=~\"$pipeline\",topic=~\"$topic\"})",
+          "legendFormat":"{{pipeline_name}} • {{topic}} p{{partition}}",
+          "refId":"A",
+          "datasource":{"type":"prometheus","uid":"${DS_PROM}"}
+        }
+      ]
+    },
+
+    {
+      "type":"bargauge",
+      "title":"Increase (5m) by pipeline",
+      "gridPos":{"x":0,"y":12,"w":10,"h":6},
+      "options":{"orientation":"horizontal","displayMode":"gradient"},
+      "targets":[
+        {
+          "expr":"topk(10, sum by (pipeline_name) (increase(kafka_messages_total{pipeline_name=~\"$pipeline\"}[5m])))",
+          "legendFormat":"{{pipeline_name}}",
+          "refId":"A",
+          "datasource":{"type":"prometheus","uid":"${DS_PROM}"}
+        }
+      ]
+    },
+    {
+      "type":"stat",
+      "title":"Last Message Timestamp (epoch s)",
+      "gridPos":{"x":10,"y":12,"w":7,"h":6},
+      "options":{"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"max(kafka_messages_created{pipeline_name=~\"$pipeline\"})","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}]
+    },
+    {
+      "type":"stat",
+      "title":"Time Since Last Message (s)",
+      "gridPos":{"x":17,"y":12,"w":7,"h":6},
+      "options":{"reduceOptions":{"calcs":["lastNotNull"]}},
+      "targets":[{"expr":"time() - max(kafka_messages_created{pipeline_name=~\"$pipeline\"})","refId":"A","datasource":{"type":"prometheus","uid":"${DS_PROM}"}}],
+      "fieldConfig":{"defaults":{"unit":"s"}}
+    },
+
+    {
+      "type":"timeseries",
+      "title":"GC Collections (rate) by gen",
+      "gridPos":{"x":0,"y":18,"w":12,"h":8},
+      "targets":[
+        {
+          "expr":"sum by (generation) (rate(python_gc_collections_total[5m]))",
+          "legendFormat":"gen {{generation}}",
+          "refId":"A",
+          "datasource":{"type":"prometheus","uid":"${DS_PROM}"}
+        }
+      ]
+    },
+    {
+      "type":"timeseries",
+      "title":"GC Objects Collected (rate) by gen",
+      "gridPos":{"x":12,"y":18,"w":12,"h":8},
+      "targets":[
+        {
+          "expr":"sum by (generation) (rate(python_gc_objects_collected_total[5m]))",
+          "legendFormat":"gen {{generation}}",
+          "refId":"A",
+          "datasource":{"type":"prometheus","uid":"${DS_PROM}"}
+        }
+      ]
+    }
+  ]
+}
