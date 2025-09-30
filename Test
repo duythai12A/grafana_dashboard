@@ -1,22 +1,29 @@
-# Tạo list kubelet-arg đã bọc "..." và giữ nguyên dấu "
-- name: Build final kubelet-arg list (quoted, deduped)
-  ansible.builtin.set_fact:
-    kubelet_args_final: >-
-      {{
-        (
-          (cfg['kubelet-arg'] | default([])) + kubelet_args_to_add
-        )
-        | unique
-        | map('regex_replace','"', '\\"')           # escape " bên trong nếu có
-        | map('regex_replace','^(.*)$','"\\1"')     # bọc bằng dấu "
-        | map('unsafe')                              # GIỮ nguyên " ... "
-        | list
-      }}
+- name: Parse YAML (or create empty)
+      ansible.builtin.set_fact:
+        cfg: >-
+          {{
+            (cfg_raw.content | default('') | b64decode | from_yaml)
+            if (cfg_raw is defined and cfg_raw.content is defined)
+            else {}
+          }}
 
-- name: Merge & write config.yaml (no backup)
-  ansible.builtin.copy:
-    dest: "{{ rke2_config_path }}"
-    content: "{{ (cfg | combine({'kubelet-arg': kubelet_args_final}, recursive=True)) | to_nice_yaml(indent=2) }}"
-    owner: root
-    group: root
-    mode: "0644"
+    - name: Build final kubelet-arg (deduped, keep order)
+      ansible.builtin.set_fact:
+        kubelet_args_final: >-
+          {{
+            ((cfg['kubelet-arg'] | default([])) + kubelet_args_to_add)
+            | unique
+            | list
+          }}
+
+    - name: Merge back to a single dict
+      ansible.builtin.set_fact:
+        cfg_merged: "{{ cfg | combine({'kubelet-arg': kubelet_args_final}, recursive=True) }}"
+
+    - name: Write config.yaml with quoted kubelet-arg (no backup)
+      ansible.builtin.template:
+        src: rke2_config.yaml.j2
+        dest: "{{ rke2_config_path }}"
+        owner: root
+        group: root
+        mode: "0644"
