@@ -1,17 +1,16 @@
- - name: Quote every item under kubelet-arg
-      ansible.builtin.replace:
-        path: "{{ rke2_config_path }}"
-        # nếu dòng bắt đầu bằng "- " và CHƯA có dấu " ở đầu -> bọc bằng "
-        regexp: '^(\s*-\s*)([^"\n].*?)\s*$'
-        replace: '\1"\2"'
-        after: '^kubelet-arg:\s*$'
-        before: '^[^\s]'
-      notify: []
-
-    - name: Normalize 2-space indent before list items (optional)
-      ansible.builtin.replace:
-        path: "{{ rke2_config_path }}"
-        regexp: '^\s*-\s'
-        replace: '  - '
-        after: '^kubelet-arg:\s*$'
-        before: '^[^\s]'
+- name: Quote every item under kubelet-arg
+  ansible.builtin.replace:
+    path: "{{ rke2_config_path }}"
+    regexp: '(^\s*-\s)([^"\n].*?)$'   # đầu dòng có "- ", và value CHƯA có dấu "
+    replace: '\1"\2"'
+    after: '^kubelet-arg:\s*$'        # giới hạn trong block kubelet-arg
+    before: '^[^\s]'                  # đến trước key top-level tiếp theo
+    multiline: yes                    # <-- QUAN TRỌNG
+- name: Normalize 2-space indent before list items
+  ansible.builtin.replace:
+    path: "{{ rke2_config_path }}"
+    regexp: '^\s*-\s'
+    replace: '  - '
+    after: '^kubelet-arg:\s*$'
+    before: '^[^\s]'
+    multiline: yes
