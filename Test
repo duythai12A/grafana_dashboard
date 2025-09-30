@@ -1,7 +1,26 @@
-- name: Quote every item under kubelet-arg
-  ansible.builtin.replace:
-    path: "{{ rke2_config_path }}"
-    regexp: '^(\s*-\s)([^"].*?)$'
-    replace: '\1"\2"'
-    after: '^kubelet-arg:\s*$'
-    before: '^[^\s]'
+- name: Parse YAML (or create empty)
+      ansible.builtin.set_fact:
+        cfg: >-
+          {{
+            (cfg_raw.content | b64decode | from_yaml)
+              if (cfg_raw is defined and cfg_raw.content is defined)
+              else {}
+          }}
+
+    # >>> bọc dấu " ngay ở Jinja, không dùng replace <<<
+    - name: Build final quoted kubelet-arg list (dedupe)
+      ansible.builtin.set_fact:
+        kubelet_args_final: >-
+          {{
+            (
+              (cfg['kubelet-arg'] | default([]))        # đang có trong file (có thể trống)
+              + kubelet_args_to_add                     # cộng thêm yêu cầu mới
+            )
+            | unique                                    # khử trùng lặp, giữ thứ tự đầu tiên
+            | map('regex_replace','^"?(.+?)"?$','"\\1"')  # bọc "value"
+            | list
+          }}
+
+    - name: Merge back into config map
+      ansible.builtin.set_fact:
+        cfg_merged: "{{ cfg | combine({'kubelet-arg': kubelet_args_final}, recursive=True) }}"
