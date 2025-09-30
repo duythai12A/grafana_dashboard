@@ -1,29 +1,9 @@
-- name: Parse YAML (or create empty)
-      ansible.builtin.set_fact:
-        cfg: >-
-          {{
-            (cfg_raw.content | default('') | b64decode | from_yaml)
-            if (cfg_raw is defined and cfg_raw.content is defined)
-            else {}
-          }}
-
-    - name: Build final kubelet-arg (deduped, keep order)
-      ansible.builtin.set_fact:
-        kubelet_args_final: >-
-          {{
-            ((cfg['kubelet-arg'] | default([])) + kubelet_args_to_add)
-            | unique
-            | list
-          }}
-
-    - name: Merge back to a single dict
-      ansible.builtin.set_fact:
-        cfg_merged: "{{ cfg | combine({'kubelet-arg': kubelet_args_final}, recursive=True) }}"
-
-    - name: Write config.yaml with quoted kubelet-arg (no backup)
-      ansible.builtin.template:
-        src: rke2_config.yaml.j2
-        dest: "{{ rke2_config_path }}"
-        owner: root
-        group: root
-        mode: "0644"
+{# render mọi key trừ kubelet-arg #}
+{% set cfg_without_args = (cfg_merged | dict2items
+                           | rejectattr('key','equalto','kubelet-arg')
+                           | items2dict) %}
+{{ cfg_without_args | to_nice_yaml(indent=2) | trim }}
+kubelet-arg:
+{% for a in cfg_merged['kubelet-arg'] | default([]) %}
+  - "{{ a | replace('"','\"') }}"
+{% endfor %}
