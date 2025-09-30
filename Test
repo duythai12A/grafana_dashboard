@@ -1,16 +1,16 @@
-{# bỏ các key sẽ render thủ công: kubelet-arg, server, data-dir #}
+{# Bỏ các key sẽ render thủ công: kubelet-arg, service-cidr, cluster-cidr #}
 {% set cfg_wo = (cfg_merged | dict2items
-                 | rejectattr('key','in',['kubelet-arg','server','data-dir'])
+                 | rejectattr('key','in',['kubelet-arg','service-cidr','cluster-cidr'])
                  | items2dict) %}
 
 {{ cfg_wo | to_nice_yaml(indent=2) | trim }}
 
-{# ép quote cho server và data-dir nếu tồn tại #}
-{% if cfg_merged.get('server') is defined %}
-server: "{{ cfg_merged['server'] | replace('"','\"') }}"
+{# ép quote cho cluster-cidr và service-cidr nếu tồn tại #}
+{% if cfg_merged.get('cluster-cidr') is defined %}
+cluster-cidr: "{{ cfg_merged['cluster-cidr'] | replace('"','\"') }}"
 {% endif %}
-{% if cfg_merged.get('data-dir') is defined %}
-data-dir: "{{ cfg_merged['data-dir'] | replace('"','\"') }}"
+{% if cfg_merged.get('service-cidr') is defined %}
+service-cidr: "{{ cfg_merged['service-cidr'] | replace('"','\"') }}"
 {% endif %}
 
 kubelet-arg:
