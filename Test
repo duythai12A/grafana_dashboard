@@ -1,8 +1,18 @@
-{# render mọi key trừ kubelet-arg #}
-{% set cfg_without_args = (cfg_merged | dict2items
-                           | rejectattr('key','equalto','kubelet-arg')
-                           | items2dict) %}
-{{ cfg_without_args | to_nice_yaml(indent=2) | trim }}
+{# bỏ các key sẽ render thủ công: kubelet-arg, server, data-dir #}
+{% set cfg_wo = (cfg_merged | dict2items
+                 | rejectattr('key','in',['kubelet-arg','server','data-dir'])
+                 | items2dict) %}
+
+{{ cfg_wo | to_nice_yaml(indent=2) | trim }}
+
+{# ép quote cho server và data-dir nếu tồn tại #}
+{% if cfg_merged.get('server') is defined %}
+server: "{{ cfg_merged['server'] | replace('"','\"') }}"
+{% endif %}
+{% if cfg_merged.get('data-dir') is defined %}
+data-dir: "{{ cfg_merged['data-dir'] | replace('"','\"') }}"
+{% endif %}
+
 kubelet-arg:
 {% for a in cfg_merged['kubelet-arg'] | default([]) %}
   - "{{ a | replace('"','\"') }}"
