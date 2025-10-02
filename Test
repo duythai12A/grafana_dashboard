@@ -1,11 +1,14 @@
--- vào DB mà Harbor dùng (ví dụ: registry)
-\c registry;
+version: '3.8'
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--requirepass", "strongpassword"]
 
--- cấp quyền cho user (ví dụ harbor_user)
-GRANT ALL PRIVILEGES ON SCHEMA registry TO harbor_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA registry TO harbor_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA registry TO harbor_user;
-
--- cho các bảng mới tạo tự động cũng được quyền
-ALTER DEFAULT PRIVILEGES IN SCHEMA registry GRANT ALL ON TABLES TO harbor_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA registry GRANT ALL ON SEQUENCES TO harbor_user;
+volumes:
+  redis_data:
