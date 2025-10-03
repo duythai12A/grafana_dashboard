@@ -1,3 +1,3 @@
 curl -k -sS -u "admin:PASS" \
-"https://<FQDN>/api/v2.0/repositories/$(jq -rn --arg x 'vlp/kubeflow/spark-operator' '$x|@uri')/artifacts?with_tag=true&sort=-push_time&page=1&page_size=10" \
--w '\nHTTP:%{http_code}\n' | head
+"https://registry.vlp.vn/api/v2.0/projects/vlp/repositories/$(jq -rn --arg x 'kubeflow/spark-operator' '$x|@uri')/artifacts?with_tag=true&sort=-push_time&page=1&page_size=5" \
+| jq '[.[].tags[].name]'
