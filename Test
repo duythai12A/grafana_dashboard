@@ -1,18 +1,2 @@
-version: "3.8"
-
-services:
-  redis:
-    image: redis:8.2.1
-    container_name: redis-server
-    restart: always
-    ports:
-      - "6379:6379"                      # hoặc "10.211.146.78:6379:6379"
-    command: ["redis-server",
-              "--appendonly", "yes",
-              "--bind", "0.0.0.0",
-              "--requirepass", "R3diTK1s"]
-    volumes:
-      - redis_data:/data
-
-volumes:
-  redis_data:
+curl -u admin:'<password>' \
+  "https://<harbor_url>/api/v2.0/projects/<project_name>/repositories/<repo_name>/artifacts?page=1&page_size=100&sort=-push_time"
