@@ -2,55 +2,73 @@
 set -euo pipefail
 
 # ======= CONFIG =======
-HARBOR_URL="https://registry.example.com"   # Dùng FQDN + https, KHÔNG có / ở cuối
-PROJECT="vlp"                               # Tên project (lowercase)
-USER="admin"                                # Khuyên dùng robot account có pull
+HARBOR_URL="https://registry.example.com"   # FQDN + https, KHÔNG có / ở cuối
+PROJECT="vlp"                               # tên project (lowercase)
+USER="admin"
 PASS="changeme"
 PAGE_SIZE=100
-INSECURE="-k"                               # Bỏ -k nếu cert hợp lệ
+INSECURE="-k"                               # bỏ nếu cert hợp lệ
 # ======================
 
-CURL_BASE=(curl -sS -fL $INSECURE -u "$USER:$PASS")
+CURL=(curl -sS -fL $INSECURE -u "$USER:$PASS")
 
 urlencode() { jq -rn --arg x "$1" '$x|@uri'; }
+
+# helper: GET url -> body + http_code (phần code ở dòng cuối)
+get_with_code () {
+  local url="$1"
+  "${CURL[@]}" -w $'\nHTTP_CODE:%{http_code}' "$url" 2>/dev/null || true
+}
 
 echo "repository,latest_tag,pushed_at,digest"
 
 page=1
 while :; do
-  # Lấy danh sách repositories trong 1 project (có phân trang)
-  repos_json="$("${CURL_BASE[@]}" \
-    "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories?page=$page&page_size=$PAGE_SIZE")" || {
-      echo "ERROR: list repositories failed on page $page" >&2; exit 1; }
+  # Lấy danh sách repo của project (có phân trang)
+  resp="$("${CURL[@]}" "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories?page=$page&page_size=$PAGE_SIZE" 2>/dev/null || true)"
+  [ -z "$resp" ] && break
+  [ "$(jq 'length' <<<"$resp")" -eq 0 ] && break
 
-  # Hết dữ liệu thì dừng
-  [ "$(jq 'length' <<<"$repos_json")" -eq 0 ] && break
+  # .name thường có dạng "vlp/path/name"
+  echo "$resp" | jq -r '.[].name' | while read -r repo_full; do
+    # repo_relative = bỏ "PROJECT/" nếu có
+    repo_relative="${repo_full#"$PROJECT/"}"
 
-  # Lặp từng repo (tên đầy đủ: project/path/name)
-  echo "$repos_json" | jq -r '.[].name' | while read -r repo_full; do
-    # URL-encode toàn bộ tên repo để giữ nguyên dấu '/'
-    repo_enc="$(urlencode "$repo_full")"
+    repo_enc_rel="$(urlencode "$repo_relative")"  # cho cách (1)
+    repo_enc_full="$(urlencode "$repo_full")"     # cho cách (2)
 
-    # Lấy artifacts mới nhất (with_tag=true để chỉ trả artifact có tag)
-    # sort=-push_time để artifact push gần nhất đứng đầu
-    arts_json="$("${CURL_BASE[@]}" \
-      "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories/$repo_enc/artifacts?with_tag=true&sort=-push_time&page=1&page_size=200" \
-      2>/dev/null || true)"
+    # ---- Cách (1): /projects/{project}/repositories/{repo_relative}/artifacts
+    url1="$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories/$repo_enc_rel/artifacts?with_tag=true&sort=-push_time&page=1&page_size=200"
+    out1="$(get_with_code "$url1")"
+    body1="${out1%$'\n'HTTP_CODE:*}"
+    code1="${out1##*HTTP_CODE:}"
 
-    if [ -z "$arts_json" ] || [ "$arts_json" = "[]" ]; then
+    chosen_body=""
+    if [ "$code1" = "200" ] && [ -n "$body1" ] && [ "$body1" != "[]" ]; then
+      chosen_body="$body1"
+    else
+      # ---- Fallback (2): /repositories/{project%2Frepo}/artifacts
+      url2="$HARBOR_URL/api/v2.0/repositories/$repo_enc_full/artifacts?with_tag=true&sort=-push_time&page=1&page_size=200"
+      out2="$(get_with_code "$url2")"
+      body2="${out2%$'\n'HTTP_CODE:*}"
+      code2="${out2##*HTTP_CODE:}"
+      if [ "$code2" = "200" ] && [ -n "$body2" ] && [ "$body2" != "[]" ]; then
+        chosen_body="$body2"
+      fi
+    fi
+
+    if [ -z "$chosen_body" ]; then
       echo "$repo_full,-,-,-"
       continue
     fi
 
-    # Lọc artifact có tags, chọn cái có push_time mới nhất
+    # Lọc artifact có tag, lấy cái push_time mới nhất
     csv_line="$(jq -r '
       [ .[] | select(.tags != null and (.tags|length) > 0) ] as $a
-      | if ($a|length)==0 then
-          ""
-        else
+      | if ($a|length)==0 then "" else
           ( $a | max_by(.push_time) | [ .tags[0].name, .push_time, .digest ] | @csv )
         end
-    ' <<<"$arts_json")"
+    ' <<<"$chosen_body")"
 
     if [ -z "$csv_line" ] || [ "$csv_line" = "null" ]; then
       echo "$repo_full,-,-,-"
