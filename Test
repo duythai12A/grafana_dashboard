@@ -1,3 +1,10 @@
 curl -k -sS -u "admin:PASS" \
-"https://registry.vlp.vn/api/v2.0/projects/vlp/repositories/$(jq -rn --arg x 'kubeflow/spark-operator' '$x|@uri')/artifacts?with_tag=true&sort=-push_time&page=1&page_size=5" \
-| jq '[.[].tags[].name]'
+"https://registry.vlp.vn/api/v2.0/projects/vlp/repositories/kubeflow%2Fspark-operator/artifacts?with_tag=true&sort=-push_time&page=1&page_size=5" \
+| jq -r '
+  [ .[] | select(.tags != null and (.tags|length) > 0) ] as $t
+  | if ($t|length) > 0 then
+      ( $t | max_by(.push_time) | [ "tag:" + .tags[0].name, .push_time, .digest ] | @csv )
+    else
+      ( ( . | max_by(.push_time) ) | ["<untagged>", .push_time, .digest] | @csv )
+    end
+'
