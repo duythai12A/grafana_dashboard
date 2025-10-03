@@ -1,3 +1,41 @@
-curl -k -sS -u "admin:PASSWORD" \
-"https://registry.vlp.vn/api/v2.0/projects/vlp/repositories/hadoop/artifacts?with_tag=true&sort=-push_time&page=1&page_size=1" \
-| jq -r '.[0] | {digest, push_time, tag: ( .tags[0].name // "<untagged>" )}'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ======= CONFIG =======
+HARBOR_URL="https://registry.vlp.vn"   # FQDN + https, không có / ở cuối
+PROJECT="vlp"
+USER="admin"
+PASS="changeme"
+PAGE_SIZE=100
+INSECURE="-k"                           # bỏ nếu cert hợp lệ
+# ======================
+
+CURL=(curl -sS -fL $INSECURE -u "$USER:$PASS")
+urlencode() { jq -rn --arg x "$1" '$x|@uri'; }
+
+echo "repository,tag"
+
+page=1
+while :; do
+  # Lấy list repositories trong project
+  repos="$("${CURL[@]}" \
+    "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories?page=$page&page_size=$PAGE_SIZE")"
+
+  [ -z "$repos" ] && break
+  [ "$(jq 'length' <<<"$repos")" -eq 0 ] && break
+
+  echo "$repos" | jq -r '.[].name' | while read -r repo_full; do
+    repo_rel="${repo_full#"$PROJECT/"}"   # bỏ tiền tố project
+    enc_rel="$(urlencode "$repo_rel")"
+
+    # Lấy artifact mới nhất theo push_time (có tag)
+    arts="$("${CURL[@]}" \
+      "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories/$enc_rel/artifacts?with_tag=true&sort=-push_time&page=1&page_size=1")"
+
+    tag="$(jq -r '.[0].tags[0].name // "<untagged>"' <<<"$arts" 2>/dev/null || echo "-")"
+
+    echo "$repo_full:$tag"
+  done
+
+  page=$((page+1))
+done
