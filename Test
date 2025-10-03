@@ -1,57 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ======= CONFIG =======
-HARBOR_URL="https://harbor.example.com"   # Không có dấu / ở cuối
-PROJECT="myproject"
-USER="admin"                               # Nên dùng robot account
+HARBOR_URL="https://registry.example.com"   # dùng FQDN + https
+PROJECT="vlp"                                # đúng tên project (lowercase)
+USER="admin"
 PASS="******"
-INSECURE="-k"                              # Bỏ nếu có TLS hợp lệ
 PAGE_SIZE=100
-# ======================
+INSECURE="-k"   # bỏ nếu cert hợp lệ
+CURL="curl -sS -fL $INSECURE -u \"$USER:$PASS\""
 
 urlencode() { jq -rn --arg x "$1" '$x|@uri'; }
 
-page=1
 echo "repository,latest_tag,pushed_at,digest"
 
+page=1
 while :; do
-  repos_json=$(
-    curl $INSECURE -sS -u "$USER:$PASS" \
-      "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories?page=$page&page_size=$PAGE_SIZE"
-  )
+  repos_json=$(eval $CURL "\"$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories?page=$page&page_size=$PAGE_SIZE\"") || {
+    echo "ERROR: list repositories failed on page $page" >&2; exit 1; }
 
-  # Hết dữ liệu?
   [ "$(jq 'length' <<<"$repos_json")" -eq 0 ] && break
 
-  # Lặp từng repo
+  # tên đầy đủ repo trong project (vd: vlp/nginx, vlp/libs/ubuntu)
   echo "$repos_json" | jq -r '.[].name' | while read -r repo_full; do
-    # repo_full ví dụ: "myproject/nginx" hoặc "myproject/libs/ubuntu"
     repo_enc=$(urlencode "$repo_full")
 
-    # Lấy artifact mới nhất theo push_time, chỉ quan tâm artifact có tag
-    arts_json=$(
-      curl $INSECURE -sS -u "$USER:$PASS" \
-        "$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories/$repo_enc/artifacts?with_tag=true&sort=-push_time&page=1&page_size=50"
-    )
+    arts_json=$(eval $CURL \
+      "\"$HARBOR_URL/api/v2.0/projects/$PROJECT/repositories/$repo_enc/artifacts?with_tag=true&sort=-push_time&page=1&page_size=100\"") || {
+      echo "$repo_full,-,-,-"; continue; }
 
-    # Tìm artifact đầu tiên có tag
-    idx=$(jq 'to_entries
-              | map(select(.value.tags != null and (.value.tags|length) > 0))
-              | (.[0].key // -1)' <<<"$arts_json")
+    # Lọc artifact có tags, lấy cái mới nhất theo push_time
+    line=$(jq -r '
+      [ .[] | select(.tags != null and (.tags|length) > 0) ] as $a
+      | if ($a|length)==0 then "" else
+          ( ($a | max_by(.push_time)) | [ .tags[0].name, .push_time, .digest ] | @csv )
+        end
+    ' <<<"$arts_json")
 
-    if [ "$idx" -ge 0 ]; then
-      latest_tag=$(jq -r ".[$idx].tags[0].name" <<<"$arts_json")
-      pushed_at=$(jq -r ".[$idx].push_time" <<<"$arts_json")
-      digest=$(jq -r ".[$idx].digest" <<<"$arts_json")
+    if [ -z "$line" ] || [ "$line" = "null" ]; then
+      echo "$repo_full,-,-,-"
     else
-      latest_tag="-"
-      pushed_at="-"
-      digest="-"
+      # @csv cho ra "tag","time","digest" → bỏ ngoặc kép
+      echo "$repo_full,$(sed 's/^"\(.*\)"$/\1/' <<<"$line" | tr -d '"')"
     fi
-
-    echo "$repo_full,$latest_tag,$pushed_at,$digest"
   done
 
-  page=$((page + 1))
+  page=$((page+1))
 done
