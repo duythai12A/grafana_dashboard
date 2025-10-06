@@ -1,0 +1,66 @@
+#!/bin/sh
+# Restore etcd snapshot from MinIO (S3-compatible)
+set -euo pipefail
+
+### ==== MinIO config (export trước hoặc sửa ngay tại đây) ====
+: "${AWS_ACCESS_KEY_ID:=minio_access_key}"
+: "${AWS_SECRET_ACCESS_KEY:=minio_secret_key}"
+: "${AWS_DEFAULT_REGION:=us-east-1}"          # MinIO không quan tâm, để mặc định
+
+: "${MINIO_ENDPOINT:=http://minio.local:9000}"  # http(s)://host:port
+: "${MINIO_BUCKET:=taha-k8-etcd-backup}"        # bucket chứa backup
+: "${S3_PREFIX:=}"                               # ví dụ: "etcd/" nếu có folder con trong bucket
+
+# Nếu MinIO dùng self-signed cert:
+# export AWS_CA_BUNDLE=/path/to/minio-ca.crt
+# hoặc (không khuyến nghị) thêm --no-verify-ssl vào lệnh aws
+
+### ==== Dọn & chuẩn bị thư mục ====
+[ -d /opt/etcd-restore ] && rm -rf /opt/etcd-restore
+mkdir -p /opt/etcd-restore
+mkdir -p aws-etcd-restore
+
+### ==== Sync backup từ MinIO về local ====
+aws s3 sync "s3://${MINIO_BUCKET}/${S3_PREFIX}" ./aws-etcd-restore \
+  --endpoint-url "${MINIO_ENDPOINT}" \
+  --no-progress
+
+### ==== Giải nén nếu bạn nén tar.gz khi backup ====
+if [ -f ./aws-etcd-restore/etcd-backup.tar.gz ]; then
+  # Tar này được tạo để bung ra /opt/etcd-backup (giống script cũ)
+  tar -xf ./aws-etcd-restore/etcd-backup.tar.gz -C /
+fi
+
+### ==== Lấy snapshot mới nhất ====
+if [ -d /opt/etcd-backup ] && [ "$(ls -A /opt/etcd-backup)" ]; then
+  RECENT_BACKUP="/opt/etcd-backup/$(ls -Art /opt/etcd-backup/ | tail -n 1)"
+elif ls ./aws-etcd-restore/*.db >/dev/null 2>&1; then
+  # Trường hợp upload trực tiếp file .db lên MinIO
+  RECENT_BACKUP="$(ls -Art ./aws-etcd-restore/*.db | tail -n 1)"
+else
+  echo "Không tìm thấy snapshot etcd (.db) hoặc tar đã bung vào /opt/etcd-backup." >&2
+  exit 1
+fi
+
+echo "RECENT_BACKUP = ${RECENT_BACKUP}"
+
+### ==== Restore snapshot vào data-dir mới ====
+# Ghi chú:
+# - Nếu cụm etcd của bạn cần khai báo topology, có thể đặt thêm biến môi trường sau
+#   và bỏ comment các dòng tương ứng bên dưới:
+#   ETCD_NAME, ETCD_INITIAL_ADVERTISE_PEER_URLS, ETCD_INITIAL_CLUSTER,
+#   ETCD_INITIAL_CLUSTER_TOKEN, ETCD_INITIAL_CLUSTER_STATE
+#
+# Ví dụ (tuỳ môi trường):
+# ETCDCTL_API=3 etcdctl snapshot restore "$RECENT_BACKUP" \
+#   --data-dir /opt/etcd-restore \
+#   --name "${ETCD_NAME}" \
+#   --initial-advertise-peer-urls "${ETCD_INITIAL_ADVERTISE_PEER_URLS}" \
+#   --initial-cluster "${ETCD_INITIAL_CLUSTER}" \
+#   --initial-cluster-token "${ETCD_INITIAL_CLUSTER_TOKEN:-etcd-cluster}" \
+#   --initial-cluster-state new
+
+ETCDCTL_API=3 etcdctl snapshot restore "${RECENT_BACKUP}" \
+  --data-dir /opt/etcd-restore
+
+echo "✔ Restore xong vào /opt/etcd-restore"
