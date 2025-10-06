@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# rke2-join-server.sh
+set -euo pipefail
+
+: "${RKE2_VERSION:=v1.30.5+rke2r1}"        # chỉnh version nếu cần
+: "${CLUSTER_TOKEN:?Put-cluster-token-here}" # bắt buộc
+: "${ADVERTISE_IP:=<THIS_NODE_IP>}"          # IP của node server này
+: "${SERVER_ARGS:=}"                         # thêm args nếu muốn, vd: "--disable rke2-ingress-nginx"
+
+# Cài rke2-server (nếu chưa có)
+if ! command -v rke2 &>/dev/null; then
+  curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION="$RKE2_VERSION" sh -
+fi
+
+# Tạo config
+sudo mkdir -p /etc/rancher/rke2
+cat <<EOF | sudo tee /etc/rancher/rke2/config.yaml
+token: ${CLUSTER_TOKEN}
+tls-san:
+  - ${ADVERTISE_IP}
+advertise-address: ${ADVERTISE_IP}
+node-ip: ${ADVERTISE_IP}
+write-kubeconfig-mode: "0644"
+${SERVER_ARGS:+${SERVER_ARGS}}
+EOF
+
+# Start
+sudo systemctl enable rke2-server --now
+sudo journalctl -u rke2-server -f
+
+
+#!/usr/bin/env bash
+# rke2-join-agent.sh
+set -euo pipefail
+
+: "${RKE2_VERSION:=v1.30.5+rke2r1}"
+: "${CLUSTER_TOKEN:?Put-cluster-token-here}"      # cùng token với server
+: "${SERVER_URL:=https://<MASTER_IP>:9345}"       # URL API tunnel của rke2-server
+: "${NODE_IP:=<THIS_NODE_IP>}"
+: "${KUBELET_ARGS:=}"                              # ví dụ: "- enable-debugging-handlers=true"
+: "${NODE_LABELS:=role=worker,zone=hn}"            # tuỳ chọn
+: "${NODE_TAINTS:=}"                               # ví dụ: "dedicated=etl:NoSchedule"
+
+if ! command -v rke2 &>/dev/null; then
+  curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_VERSION="$RKE2_VERSION" sh -
+fi
+
+sudo mkdir -p /etc/rancher/rke2
+cat <<EOF | sudo tee /etc/rancher/rke2/config.yaml
+server: ${SERVER_URL}
+token: ${CLUSTER_TOKEN}
+node-ip: ${NODE_IP}
+node-label:
+  - ${NODE_LABELS}
+${NODE_TAINTS:+node-taint:\n  - ${NODE_TAINTS}}
+${KUBELET_ARGS:+kubelet-arg:\n  - ${KUBELET_ARGS}}
+EOF
+
+sudo systemctl enable rke2-agent --now
+sudo journalctl -u rke2-agent -f
+
+#!/usr/bin/env bash
+# rke2-detach-worker.sh <nodeName>
+set -euo pipefail
+NODE="${1:?Usage: $0 <nodeName>}"
+
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+
+# Cordon & drain (giữ volume nếu cần thì bỏ --delete-emptydir-data)
+kubectl cordon "$NODE"
+kubectl drain "$NODE" --ignore-daemonsets --delete-emptydir-data --grace-period=60 --timeout=10m
+
+# Xoá Node object
+kubectl delete node "$NODE"
+
+# Trên chính worker (SSH vào node đó) gỡ dịch vụ:
+ssh "root@${NODE}" 'sudo systemctl disable --now rke2-agent || true; sudo /usr/local/bin/rke2-killall.sh || true; sudo /usr/local/bin/rke2-agent-uninstall.sh || true'
+echo "Worker $NODE detached."
+
+
+#!/usr/bin/env bash
+# rke2-detach-server.sh <serverNodeName>
+set -euo pipefail
+NODE="${1:?Usage: $0 <serverNodeName>}"
+
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+
+# 1) Cordon & drain
+kubectl cordon "$NODE"
+kubectl drain "$NODE" --ignore-daemonsets --delete-emptydir-data --grace-period=60 --timeout=15m
+
+# 2) Lấy memberID etcd ứng với NODE và remove (embedded etcd)
+# Thiết lập biến TLS etcd (đường dẫn mặc định của RKE2)
+ETCD_DIR="/var/lib/rancher/rke2/server/tls/etcd"
+export ETCDCTL_API=3
+export ETCDCTL_CACERT="${ETCD_DIR}/server-ca.crt"
+export ETCDCTL_CERT="${ETCD_DIR}/server-client.crt"
+export ETCDCTL_KEY="${ETCD_DIR}/server-client.key"
+
+# lấy peer URL của NODE
+PEER_URL=$(kubectl -n kube-system get endpoints rke2-etcd -o jsonpath='{.subsets[0].addresses[*].ip}' \
+  | tr ' ' '\n' | while read -r ip; do echo "https://${ip}:2380"; done)
+
+# Lấy member cần remove theo tên NODE
+MEMBER_ID=$(etcdctl --endpoints="${PEER_URL}" member list | grep "$NODE" | awk -F',' '{print $1}')
+[ -n "$MEMBER_ID" ] && etcdctl --endpoints="${PEER_URL}" member remove "$MEMBER_ID" || echo "Không tìm thấy member etcd cho $NODE (bỏ qua)."
+
+# 3) Xoá Node object
+kubectl delete node "$NODE"
+
+echo ">>> Bây giờ SSH vào $NODE và gỡ dịch vụ server:"
+echo "sudo systemctl disable --now rke2-server || true"
+echo "sudo /usr/local/bin/rke2-killall.sh || true"
+echo "sudo /usr/local/bin/rke2-uninstall.sh || true"
