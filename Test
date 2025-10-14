@@ -16,3 +16,9 @@ kubectl get clusterrolebinding flannel -o yaml
 # - kind: ServiceAccount
 #   name: flannel
 #   namespace: kube-system
+kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- sh -c '
+  H=$KUBERNETES_SERVICE_HOST; P=${KUBERNETES_PORT_443_TCP_PORT:-443};
+  T=/var/run/secrets/kubernetes.io/serviceaccount/token;
+  C=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt;
+  wget -qO- --timeout=5 --header "Authorization: Bearer $(cat $T)" --ca-certificate $C https://$H:$P/version || echo FAIL
+'
