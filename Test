@@ -1,1 +1,18 @@
-https://github.com/zalando/pg_sentinel/archive/refs/heads/master.tar.gz
+# 1) SA
+kubectl -n kube-system get sa flannel
+
+# 2) DaemonSet dùng đúng SA?
+kubectl -n kube-system get ds kube-flannel-ds -o jsonpath='{.spec.template.spec.serviceAccountName}{"\n"}'
+
+# 3) ClusterRole có quyền nodes?
+kubectl get clusterrole flannel -o yaml | egrep -A3 'resources:|verbs:' | sed -n '1,120p'
+# cần thấy resources: nodes, pods, nodes/status ... và verbs: get,list,watch
+
+# 4) ClusterRoleBinding bind đúng subject?
+kubectl get clusterrolebinding flannel -o yaml
+# cần thấy:
+# roleRef.name: flannel
+# subjects:
+# - kind: ServiceAccount
+#   name: flannel
+#   namespace: kube-system
