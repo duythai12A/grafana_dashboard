@@ -22,3 +22,6 @@ kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- sh -c '
   C=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt;
   wget -qO- --timeout=5 --header "Authorization: Bearer $(cat $T)" --ca-certificate $C https://$H:$P/version || echo FAIL
 '
+kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- ls -l /var/run/secrets/kubernetes.io/serviceaccount
+# và:
+kubectl -n kube-system get ds kube-flannel-ds -o jsonpath='{.spec.template.spec.automountServiceAccountToken}{"\n"}'
