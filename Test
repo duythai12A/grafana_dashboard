@@ -25,3 +25,6 @@ kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- sh -c '
 kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- ls -l /var/run/secrets/kubernetes.io/serviceaccount
 # và:
 kubectl -n kube-system get ds kube-flannel-ds -o jsonpath='{.spec.template.spec.automountServiceAccountToken}{"\n"}'
+kubectl -n kube-system patch ds <tên-flannel> -p \
+'{"spec":{"template":{"spec":{"automountServiceAccountToken": true}}}}'
+kubectl -n kube-system rollout restart ds <tên-flannel>
