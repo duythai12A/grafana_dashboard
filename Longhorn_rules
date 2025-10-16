@@ -1,22 +1,22 @@
-label_replace(
-  (
-    100 *
-      (sum by (volume) (longhorn_volume_actual_size_bytes))
-      / clamp_min(sum by (volume) (longhorn_volume_capacity_bytes), 1)
-  )
-  * on (volume) group_left()
-    max by (volume) (longhorn_volume_state == 2),
-  "persistentvolume", "$1", "volume", "(.*)"
-)
-* on (persistentvolume)
-  group_left(namespace, persistentvolumeclaim, storageclass)
-  max by (persistentvolume, namespace, persistentvolumeclaim, storageclass) (
+(
+  sum by (namespace, persistentvolumeclaim, storageclass) (
     label_replace(
-      label_replace(
-        kube_persistentvolume_info,
-        "namespace", "$1", "claim_ref_namespace", "(.*)"
-      ),
-      "persistentvolumeclaim", "$1", "claim_ref_name", "(.*)"
+      (
+        100 *
+          (sum by (volume) (longhorn_volume_actual_size_bytes))
+          / clamp_min(sum by (volume) (longhorn_volume_capacity_bytes), 1)
+      )
+      * on (volume) group_left()
+        max by (volume) (longhorn_volume_state == 2),
+      "persistentvolume", "$1", "volume", "(.*)"
     )
+    * on (persistentvolume)
+      group_left(namespace, persistentvolumeclaim, storageclass)
+      max by (persistentvolume, namespace, persistentvolumeclaim, storageclass) (
+        label_replace(
+          label_replace(kube_persistentvolume_info,
+            "namespace","$1","claim_ref_namespace","(.*)"),
+          "persistentvolumeclaim","$1","claim_ref_name","(.*)")
+      )
   )
-> 90
+) > 90
