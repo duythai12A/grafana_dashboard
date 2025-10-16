@@ -1,11 +1,13 @@
 (
-        label_replace(
-          100 * (avg by (volume) (longhorn_volume_actual_size_bytes))
-              / (avg by (volume) (longhorn_volume_capacity_bytes)),
-          "persistentvolume", "$1", "volume", "(.*)"
-        )
-      )
-      * on (persistentvolume)
-        group_left(namespace, persistentvolumeclaim, storageclass)
-        kube_persistentvolumeclaim_info
-      > ể0
+  label_replace(
+    100 *
+      (avg by (volume) (longhorn_volume_actual_size_bytes))
+      / clamp_min(avg by (volume) (longhorn_volume_capacity_bytes), 1)
+    * on (volume) group_left()
+      (longhorn_volume_state{state="attached"} == 1)
+  , "persistentvolume", "$1", "volume", "(.*)")
+)
+* on (persistentvolume)
+  group_left(namespace, persistentvolumeclaim, storageclass)
+  max by (persistentvolume, namespace, persistentvolumeclaim, storageclass) (kube_persistentvolumeclaim_info)
+> 90
