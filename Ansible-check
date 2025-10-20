@@ -10,6 +10,13 @@
         name: "{{ item.instance }}"
         groups: from_vars
         log_paths: ["{{ item.path }}"]
+      when: >
+    item.instance in groups['all']
+    or item.instance in (
+      groups['all']
+      | map('extract', hostvars, 'ansible_host')
+      | select('defined') | select('string') | list
+    )
       loop: "{{ servers }}"
 
 - hosts: from_vars
