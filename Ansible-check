@@ -1,0 +1,49 @@
+---
+# Play 1: Đọc Excel và dựng inventory động
+- hosts: localhost
+  gather_facts: false
+  vars:
+    excel_file: files/logs.xlsx         # đổi path nếu cần
+    sheet_name: Sheet1                  # đổi tên sheet nếu cần
+  tasks:
+    - name: Read Excel rows (header=1 => dùng dòng đầu làm header)
+      set_fact:
+        excel_rows: "{{ lookup('community.general.read_excel', excel_file, sheet=sheet_name, header=1) }}"
+
+    - name: Build map { ip: [log_paths] }
+      set_fact:
+        host_map: >-
+          {{ host_map | default({}) |
+             combine({ item.instance: (host_map[item.instance] | default([])) + [item.log_path] }) }}
+      loop: "{{ excel_rows }}"
+
+    - name: Add dynamic hosts with their log_paths
+      add_host:
+        name: "{{ item.key }}"             # tên host = IP
+        ansible_host: "{{ item.key }}"
+        groups: from_excel
+        log_paths: "{{ (item.value | select('string') | list) | unique }}"
+      loop: "{{ host_map | dict2items }}"
+
+# Play 2: SSH sang host và kiểm tra file tồn tại
+- hosts: from_excel
+  gather_facts: false
+  become: true     # bật nếu cần quyền root để đọc đường dẫn
+  vars:
+    # có thể set user/port/ssh key tại đây hoặc qua inventory/group_vars
+    # ansible_user: youruser
+    # ansible_ssh_private_key_file: ~/.ssh/id_rsa
+  tasks:
+    - name: Stat each log path
+      ansible.builtin.stat:
+        path: "{{ item }}"
+        follow: true
+      loop: "{{ log_paths | default([]) }}"
+      register: st
+
+    - name: Summary per host
+      ansible.builtin.debug:
+        msg: |
+          {{ inventory_hostname }}
+          existing: {{ st.results | selectattr('stat.exists') | map(attribute='invocation.module_args.path') | list }}
+          missing : {{ st.results | rejectattr('stat.exists') | map(attribute='invocation.module_args.path') | list }}
