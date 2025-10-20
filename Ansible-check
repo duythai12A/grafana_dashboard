@@ -1,43 +1,28 @@
-# check_logs_from_excel.yml
 ---
-# Play 1: Đọc Excel và gán log_paths cho đúng host đã có trong inventory
 - hosts: localhost
   gather_facts: false
-  vars:
-    excel_file: files/logs.xlsx      # đổi nếu cần
-    sheet_name: Sheet1
+  vars_files:
+    - vars/check_logs.yml
+
   tasks:
-    - name: Read Excel (header dòng đầu: instance, log_path)
-      set_fact:
-        excel_rows: "{{ lookup('community.general.read_excel', excel_file, sheet=sheet_name, header=1) }}"
-
-    - name: Gom { ip: [log_paths] }
-      set_fact:
-        host_map: >-
-          {{ host_map | default({}) |
-             combine({ item.instance: (host_map[item.instance] | default([])) + [item.log_path] }) }}
-      loop: "{{ excel_rows }}"
-
-    - name: Add host vào group from_excel (KHÔNG override ssh user/ansible_host)
+    - name: Add hosts from vars file
       add_host:
-        name: "{{ item.key }}"                     # phải trùng TÊN host trong inventory (ở đây là IP)
-        groups: from_excel
-        log_paths: "{{ (item.value | select('string') | list) | unique }}"
-      loop: "{{ host_map | dict2items }}"
+        name: "{{ item.instance }}"
+        groups: from_vars
+        log_paths: ["{{ item.path }}"]
+      loop: "{{ servers }}"
 
-# Play 2: Kiểm tra tồn tại file log theo từng host
-- hosts: from_excel
+- hosts: from_vars
   gather_facts: false
-  # Không đặt become/ansible_user ở đây -> dùng đúng cấu hình trong inventory
+  become: true
   tasks:
-    - name: Stat từng log path
+    - name: Check if log file exists
       stat:
         path: "{{ item }}"
-        follow: true
-      loop: "{{ log_paths | default([]) }}"
+      loop: "{{ log_paths }}"
       register: st
 
-    - name: In kết quả theo host
+    - name: Show result
       debug:
         msg: |
           {{ inventory_hostname }}
