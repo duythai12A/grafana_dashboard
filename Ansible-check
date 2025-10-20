@@ -1,37 +1,11 @@
----
-- hosts: localhost
-  gather_facts: false
-  vars_files:
-    - vars/check_logs.yml
-
-  tasks:
-    - name: Add hosts from vars file
-      add_host:
-        name: "{{ item.instance }}"
-        groups: from_vars
-        log_paths: ["{{ item.path }}"]
-      when: >
-    item.instance in groups['all']
-    or item.instance in (
-      groups['all']
-      | map('extract', hostvars, 'ansible_host')
-      | select('defined') | select('string') | list
-    )
-      loop: "{{ servers }}"
-
-- hosts: from_vars
-  gather_facts: false
-  become: true
-  tasks:
-    - name: Check if log file exists
-      stat:
-        path: "{{ item }}"
-      loop: "{{ log_paths }}"
-      register: st
-
-    - name: Show result
-      debug:
-        msg: |
-          {{ inventory_hostname }}
-          existing: {{ st.results | selectattr('stat.exists') | map(attribute='invocation.module_args.path') | list }}
-          missing : {{ st.results | rejectattr('stat.exists') | map(attribute='invocation.module_args.path') | list }}
+- name: Add hosts from vars file
+  add_host:
+    name: "{{ item.instance }}"
+    groups: from_vars
+    ansible_host: "{{ item.instance }}"
+    ansible_user: vt_admin                     # <<< quan trọng
+    ansible_ssh_private_key_file: ~/.ssh/id_rsa   # hoặc ansible_password: xxxx
+    become: true
+    become_method: sudo                         # hoặc su nếu môi trường bạn dùng su
+    log_paths: ["{{ item.path }}"]
+  loop: "{{ servers }}"
