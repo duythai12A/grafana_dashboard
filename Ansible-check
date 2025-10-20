@@ -1,48 +1,44 @@
+# check_logs_from_excel.yml
 ---
-# Play 1: Đọc Excel và dựng inventory động
+# Play 1: Đọc Excel và gán log_paths cho đúng host đã có trong inventory
 - hosts: localhost
   gather_facts: false
   vars:
-    excel_file: files/logs.xlsx         # đổi path nếu cần
-    sheet_name: Sheet1                  # đổi tên sheet nếu cần
+    excel_file: files/logs.xlsx      # đổi nếu cần
+    sheet_name: Sheet1
   tasks:
-    - name: Read Excel rows (header=1 => dùng dòng đầu làm header)
+    - name: Read Excel (header dòng đầu: instance, log_path)
       set_fact:
         excel_rows: "{{ lookup('community.general.read_excel', excel_file, sheet=sheet_name, header=1) }}"
 
-    - name: Build map { ip: [log_paths] }
+    - name: Gom { ip: [log_paths] }
       set_fact:
         host_map: >-
           {{ host_map | default({}) |
              combine({ item.instance: (host_map[item.instance] | default([])) + [item.log_path] }) }}
       loop: "{{ excel_rows }}"
 
-    - name: Add dynamic hosts with their log_paths
+    - name: Add host vào group from_excel (KHÔNG override ssh user/ansible_host)
       add_host:
-        name: "{{ item.key }}"             # tên host = IP
-        ansible_host: "{{ item.key }}"
+        name: "{{ item.key }}"                     # phải trùng TÊN host trong inventory (ở đây là IP)
         groups: from_excel
         log_paths: "{{ (item.value | select('string') | list) | unique }}"
       loop: "{{ host_map | dict2items }}"
 
-# Play 2: SSH sang host và kiểm tra file tồn tại
+# Play 2: Kiểm tra tồn tại file log theo từng host
 - hosts: from_excel
   gather_facts: false
-  become: true     # bật nếu cần quyền root để đọc đường dẫn
-  vars:
-    # có thể set user/port/ssh key tại đây hoặc qua inventory/group_vars
-    # ansible_user: youruser
-    # ansible_ssh_private_key_file: ~/.ssh/id_rsa
+  # Không đặt become/ansible_user ở đây -> dùng đúng cấu hình trong inventory
   tasks:
-    - name: Stat each log path
-      ansible.builtin.stat:
+    - name: Stat từng log path
+      stat:
         path: "{{ item }}"
         follow: true
       loop: "{{ log_paths | default([]) }}"
       register: st
 
-    - name: Summary per host
-      ansible.builtin.debug:
+    - name: In kết quả theo host
+      debug:
         msg: |
           {{ inventory_hostname }}
           existing: {{ st.results | selectattr('stat.exists') | map(attribute='invocation.module_args.path') | list }}
