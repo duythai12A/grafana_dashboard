@@ -3,13 +3,13 @@
   hosts: all
   gather_facts: no
   vars_files:
-    - vars.yml
+    - vars-path.yml  # Đảm bảo tệp vars-path.yml được tham chiếu đúng
 
   tasks:
     - name: Kiểm tra sự tồn tại của tệp
       stat:
         path: "{{ item }}"
-      with_items: "{{ files_to_check[inventory_hostname] }}"
+      with_items: "{{ files_to_check[inventory_hostname] }}"  # Truy cập biến files_to_check
       register: file_stat
 
     - name: Hiển thị kết quả kiểm tra tệp
