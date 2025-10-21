@@ -2,11 +2,14 @@
 - name: Kiểm tra sự tồn tại của các file trên các máy chủ
   hosts: all
   gather_facts: no
+  vars_files:
+    - vars.yml
+
   tasks:
-    - name: Kiểm tra sự tồn tại của tệp trên các máy chủ
+    - name: Kiểm tra sự tồn tại của tệp
       stat:
         path: "{{ item }}"
-      with_items: "{{ hostvars[inventory_hostname].files }}"
+      with_items: "{{ files_to_check[inventory_hostname] }}"
       register: file_stat
 
     - name: Hiển thị kết quả kiểm tra tệp
