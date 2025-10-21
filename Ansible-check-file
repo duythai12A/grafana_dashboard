@@ -1,0 +1,15 @@
+---
+- name: Kiểm tra sự tồn tại của các file trên các máy chủ
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Kiểm tra sự tồn tại của tệp trên các máy chủ
+      stat:
+        path: "{{ item }}"
+      with_items: "{{ hostvars[inventory_hostname].files }}"
+      register: file_stat
+
+    - name: Hiển thị kết quả kiểm tra tệp
+      debug:
+        msg: "IP {{ inventory_hostname }} - Tệp {{ item.item }} tồn tại: {{ item.stat.exists }}"
+      with_items: "{{ file_stat.results }}"
