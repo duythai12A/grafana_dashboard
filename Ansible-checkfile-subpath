@@ -1,0 +1,22 @@
+---
+- name: Kiểm tra file a.txt trong thư mục /u01/snapshot và các thư mục con
+  hosts: all
+  become: yes  # Nếu cần quyền root
+  tasks:
+    - name: Tìm file a.txt trong thư mục /u01/snapshot
+      find:
+        paths: /u01/snapshot
+        recurse: yes  # Tìm kiếm trong các thư mục con
+        patterns: "a.txt"
+      register: found_files
+
+    - name: Kiểm tra và in ra kết quả
+      debug:
+        msg: "File a.txt đã được tìm thấy tại {{ item.path }}"
+      with_items: "{{ found_files.files }}"
+      when: found_files.matched > 0
+
+    - name: Thông báo nếu không tìm thấy file a.txt
+      debug:
+        msg: "Không tìm thấy file a.txt trong thư mục /u01/snapshot và các thư mục con."
+      when: found_files.matched == 0
