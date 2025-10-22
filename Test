@@ -28,3 +28,5 @@ kubectl -n kube-system get ds kube-flannel-ds -o jsonpath='{.spec.template.spec.
 kubectl -n kube-system patch ds <tên-flannel> -p \
 '{"spec":{"template":{"spec":{"automountServiceAccountToken": true}}}}'
 kubectl -n kube-system rollout restart ds <tên-flannel>
+
+sudo crictl inspect <container-id> | jq -r '.info.runtimeSpec.annotations | {pod:."io.kubernetes.pod.name", ns:."io.kubernetes.pod.namespace"}'
