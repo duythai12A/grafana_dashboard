@@ -25,8 +25,26 @@ kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- sh -c '
 kubectl -n kube-system exec -it <pod-flannel> -c kube-flannel -- ls -l /var/run/secrets/kubernetes.io/serviceaccount
 # và:
 kubectl -n kube-system get ds kube-flannel-ds -o jsonpath='{.spec.template.spec.automountServiceAccountToken}{"\n"}'
+
+
 kubectl -n kube-system patch ds <tên-flannel> -p \
 '{"spec":{"template":{"spec":{"automountServiceAccountToken": true}}}}'
 kubectl -n kube-system rollout restart ds <tên-flannel>
 
+
+CID=<container-id>
+
+# Lấy sandboxID (nhiều fallback)
+SID=$(sudo crictl inspect "$CID" -o json \
+  | jq -r '
+      .status.sandboxId
+      // .info.runtimeSpec.annotations["io.kubernetes.sandbox.id"]
+      // .info.config.labels["io.kubernetes.sandbox.id"]
+      // empty')
+
+# In POD/NS từ sandbox (pod)
+sudo crictl inspectp "$SID" -o json \
+  | jq -r '
+      .status.metadata // .info.config.metadata
+      | "pod=\(.name) ns=\(.namespace)"'
 sudo crictl inspect <container-id> | jq -r '.info.runtimeSpec.annotations | {pod:."io.kubernetes.pod.name", ns:."io.kubernetes.pod.namespace"}'
