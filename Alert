@@ -22,6 +22,39 @@
   {{- else -}}info{{- end -}}
 {{- end -}}
 
+{{/* Message theo tên POD: nếu pod bắt đầu bằng en- hoặc sql- => "engine: <pod>" */}}
+{{- define "am.engineMessage" -}}
+  {{- $pod := "" -}}
+  {{- if .Labels.pod -}}
+    {{- $pod = .Labels.pod -}}
+  {{- else if .Labels.pod_name -}}
+    {{- $pod = .Labels.pod_name -}}
+  {{- else if .Labels.kubernetes_pod_name -}}
+    {{- $pod = .Labels.kubernetes_pod_name -}}
+  {{- else if .Labels.instance -}}
+    {{- $pod = .Labels.instance -}}
+  {{- end -}}
+
+  {{- if $pod -}}
+    {{- $probe := reReplaceAll "^(en-|sql-).*" "MATCHED" $pod -}}
+    {{- if eq $probe "MATCHED" -}}
+engine: {{ $pod }}
+    {{- else -}}
+      {{- if .Annotations.message -}}
+{{ .Annotations.message }}
+      {{- else if .Annotations.summary -}}
+{{ .Annotations.summary }}
+      {{- end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- if .Annotations.message -}}
+{{ .Annotations.message }}
+    {{- else if .Annotations.summary -}}
+{{ .Annotations.summary }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{ define "__subject" }}
 [LHTD Production][{{ template "am.severity" . }}] {{ template "am.alertname" . }}
 {{ end }}
@@ -79,10 +112,11 @@
                 {{ end }}
 
                 {{ range .Alerts.Firing }}
+                {{- $msg := (template "am.engineMessage" .) -}}
                 <tr><td style="padding:0 0 20px;">
                   <strong>[{{ if .Labels.severity }}{{ .Labels.severity }}{{ else }}info{{ end }}] {{ if .Labels.alertname }}{{ .Labels.alertname }}{{ else }}Alert{{ end }}</strong><br/>
                   {{- if .Annotations.summary }}<strong>Summary:</strong> {{ .Annotations.summary }}<br/>{{- end }}
-                  {{- if .Annotations.message }}<strong>Message:</strong> {{ .Annotations.message }}<br/>{{- end }}
+                  {{- if $msg }}<strong>Message:</strong> {{ $msg }}<br/>{{- end }}
                   {{- if .Annotations.description }}<strong>Description:</strong> {{ .Annotations.description }}<br/>{{- end }}
                   <a href="{{ .GeneratorURL }}" style="color:#348eda;text-decoration:underline;">Source</a><br/>
                 </td></tr>
@@ -96,10 +130,11 @@
                 {{ end }}
 
                 {{ range .Alerts.Resolved }}
+                {{- $msg := (template "am.engineMessage" .) -}}
                 <tr><td style="padding:0 0 20px;">
                   <strong>[RESOLVED][{{ if .Labels.severity }}{{ .Labels.severity }}{{ else }}info{{ end }}] {{ if .Labels.alertname }}{{ .Labels.alertname }}{{ else }}Alert{{ end }}</strong><br/>
                   {{- if .Annotations.summary }}<strong>Summary:</strong> {{ .Annotations.summary }}<br/>{{- end }}
-                  {{- if .Annotations.message }}<strong>Message:</strong> {{ .Annotations.message }}<br/>{{- end }}
+                  {{- if $msg }}<strong>Message:</strong> {{ $msg }}<br/>{{- end }}
                   {{- if .Annotations.description }}<strong>Description:</strong> {{ .Annotations.description }}<br/>{{- end }}
                   <a href="{{ .GeneratorURL }}" style="color:#348eda;text-decoration:underline;">Source</a><br/>
                 </td></tr>
@@ -154,7 +189,8 @@ One or more alarms in this group have triggered a notification.
 {{- else }}*[ALERT]*{{- end }}
 {{- if .Labels.severity }}*Severity:* `{{ .Labels.severity }}`{{- end }}
 {{- if .Annotations.summary }}*Summary:* {{ .Annotations.summary }}{{- end }}
-{{- if .Annotations.message }}*Message:* {{ .Annotations.message }}{{- end }}
+{{- $msg := (template "am.engineMessage" .) -}}
+{{- if $msg }}*Message:* {{ $msg }}{{- end }}
 {{- if .Annotations.description }}*Description:* {{ .Annotations.description }}{{- end }}
 {{- if .Annotations.runbook_url }}*Runbook URL:* <{{ .Annotations.runbook_url }}|:spiral_note_pad:>{{- end }}
 {{- end -}}
