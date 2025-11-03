@@ -1,0 +1,21 @@
+{{ if gt (len .Alerts.Firing) 0 }}
+<td class="alert alert-warning" style="...;" valign="top" align="center" bgcolor="#E6522C">
+  {{- if .CommonLabels.alertname -}}
+    {{ .CommonLabels.alertname }}
+  {{- else if gt (len .Alerts) 0 -}}
+    {{ (index .Alerts 0).Labels.alertname | default "Alert" }}
+  {{- else -}}
+    Alert
+  {{- end -}}
+</td>
+{{ else }}
+<td class="alert alert-good" style="...;" valign="top" align="center" bgcolor="#68B90F">
+  {{- if .CommonLabels.alertname -}}
+    {{ .CommonLabels.alertname }}
+  {{- else if gt (len .Alerts) 0 -}}
+    {{ (index .Alerts 0).Labels.alertname | default "Alert" }}
+  {{- else -}}
+    Alert
+  {{- end -}}
+</td>
+{{ end }}
