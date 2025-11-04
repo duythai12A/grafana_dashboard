@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: minio-log-receiver
+  namespace: logging
+spec:
+  containers:
+    - name: receiver
+      image: busybox
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo "Listening on 0.0.0.0:8080..."
+          while true; do
+            nc -l -p 8080 -v >> /logs/raw.log
+          done
+      volumeMounts:
+        - name: logs
+          mountPath: /logs
+  volumes:
+    - name: logs
+      emptyDir: {}
+  restartPolicy: Always
