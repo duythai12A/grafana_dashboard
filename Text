@@ -1,0 +1,3 @@
+curl -v -X POST -H 'Content-Type: application/json' \
+  --data '{"ping":"pong"}' \
+  http://minio-log-receiver.logging:8080
