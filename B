@@ -1,0 +1,12 @@
+sudo systemctl stop rke2-server rke2-agent 2>/dev/null || true
+
+sudo rm -rf /etc/rancher /var/lib/rancher \
+             /var/lib/kubelet /var/lib/cni /opt/cni /run/flannel \
+             /usr/local/bin/rke2* /usr/bin/rke2* \
+             /etc/systemd/system/rke2*.service
+
+# (bạn đã xoá /u01 nên bỏ qua phần đó)
+sudo systemctl daemon-reload
+sudo ip link del cni0 2>/dev/null || true
+sudo ip link del flannel.1 2>/dev/null || true
+sudo ip link del cilium_host 2>/dev/null || true
