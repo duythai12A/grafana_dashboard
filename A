@@ -9,3 +9,20 @@ kubectl delete secret -n cert-manager cert-manager-webhook-tls
 
 
 kubectl -n longhorn-system patch -p '{"value": "true"}' --type=merge lhs deleting-confirmation-flag
+
+
+
+```
+ghcr.io/nextcloud-releases/aio-alpine:20251015_082711
+ghcr.io/nextcloud-releases/aio-clamav:20251015_082711
+ghcr.io/nextcloud-releases/aio-apache:20251015_082711
+ghcr.io/nextcloud-releases/aio-collabora:20251015_082711
+ghcr.io/nextcloud-releases/aio-fulltextsearch:20251015_082711
+ghcr.io/nextcloud-releases/aio-imaginary:20251015_082711
+ghcr.io/nextcloud-releases/aio-nextcloud:20251015_082711
+ghcr.io/nextcloud-releases/aio-notify-push:20251015_082711
+ghcr.io/nextcloud-releases/aio-onlyoffice:20251015_082711
+ghcr.io/nextcloud-releases/aio-talk:20251015_082711
+ghcr.io/nextcloud-releases/aio-talk-recording:20251015_082711
+ghcr.io/nextcloud-releases/aio-whiteboard:20251015_082711
+```
