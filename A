@@ -26,3 +26,34 @@ ghcr.io/nextcloud-releases/aio-talk:20251015_082711
 ghcr.io/nextcloud-releases/aio-talk-recording:20251015_082711
 ghcr.io/nextcloud-releases/aio-whiteboard:20251015_082711
 ```
+
+
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: my-app
+  namespace: cattle-monitoring-system     # or your monitoring ns
+  labels:
+    release: rancher-monitoring           # kube-prometheus-stack uses 'release: <name>'
+spec:
+  jobLabel: app.kubernetes.io/name        # groups the target as one logical job
+  namespaceSelector:
+    matchNames:
+      - my-namespace                      # where your app runs
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: my-app
+  podMetricsEndpoints:
+    - port: metrics                       # matches the named port on the pod
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      relabelings:
+        # add the pod name as a label so you can aggregate per-pod
+        - action: replace
+          targetLabel: pod
+          sourceLabels: [__meta_kubernetes_pod_name]
+        # copy a pod label into a nice 'deployment' label for per-deployment graphs
+        - action: replace
+          targetLabel: deployment
+          sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
