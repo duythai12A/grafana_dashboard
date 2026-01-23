@@ -1,0 +1,88 @@
+// Script thay đổi tất cả avatar URLs trên trang
+(function() {
+  // Tìm tất cả thẻ img trên trang
+  const images = document.querySelectorAll('img');
+  
+  // Regex để match pattern /avatar/{user_name}/{size}
+  const avatarPattern = /\/(?:index\.php\/)?avatar\/([^\/]+)\/\d+/;
+  
+  // Hàm xử lý thay đổi URL
+  function replaceAvatarUrl(url) {
+    const match = url.match(avatarPattern);
+    if (match) {
+      const username = match[1];
+      return `https://vops.viettel.vn/avatar/${username}`;
+    }
+    return url;
+  }
+  
+  // Hàm xử lý một ảnh
+  function processImage(img) {
+    let changed = false;
+    
+    // Xử lý src
+    const src = img.getAttribute('src');
+    if (src && avatarPattern.test(src)) {
+      const newSrc = replaceAvatarUrl(src);
+      img.setAttribute('src', newSrc);
+      console.log(`Đã thay đổi src: ${src} -> ${newSrc}`);
+      changed = true;
+    }
+    
+    // Xử lý srcset
+    const srcset = img.getAttribute('srcset');
+    if (srcset) {
+      const srcsetParts = srcset.split(',').map(part => part.trim());
+      let newSrcset = srcsetParts.map(part => {
+        const [url, descriptor] = part.split(/\s+/);
+        if (avatarPattern.test(url)) {
+          const newUrl = replaceAvatarUrl(url);
+          console.log(`Đã thay đổi srcset: ${url} -> ${newUrl}`);
+          changed = true;
+          return descriptor ? `${newUrl} ${descriptor}` : newUrl;
+        }
+        return part;
+      }).join(', ');
+      
+      if (changed) {
+        img.setAttribute('srcset', newSrcset);
+      }
+    }
+    
+    return changed;
+  }
+  
+  let count = 0;
+  images.forEach(img => {
+    if (processImage(img)) {
+      count++;
+    }
+  });
+  
+  console.log(`Tổng số ảnh đã thay đổi: ${count}`);
+  
+  // Tạo observer để theo dõi các ảnh được thêm động
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeName === 'IMG') {
+          processImage(node);
+        }
+        // Kiểm tra các img bên trong node được thêm vào
+        if (node.querySelectorAll) {
+          node.querySelectorAll('img').forEach(img => {
+            processImage(img);
+          });
+        }
+      });
+    });
+  });
+  
+  // Bắt đầu theo dõi
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  console.log('Script đang chạy và theo dõi thay đổi...');
+})();
