@@ -1,0 +1,98 @@
+install node v18.19.1
+
+lưu ý nếu máy set quyền chặt thì chạy lệnh npm = sudo trước (sudo npm...) (linux)
+0. 
+- pull repo 3rd party vào source repo nextcloud-server nếu chưa có (check out nhánh stable32) https://github.com/nextcloud/3rdparty
+nhánh: 
+- vdrive-icons: main
+- nextcloud-vue: SOpen-develop
+- nextcloud-upload: v-drive
+- nextcloud-dialogs: v-drive
+- nextcloud-server: v-drive
+
+1. cd vào thư mục sau chạy: npm link
+- vdrive-icons
+- nextcloud-vue
+- nextcloud-upload
+- nextcloud-dialogs
+
+2. chạy lần lượt các lệnh sau ở từng repo (lưu ý làm nextcloud-vue đầu tiên):
+- nextcloud-vue: 
+	npm link vdrive-icons
+	npm install
+	npm run build (bắt buộc lần đầu ở tất cả repo để tạo file build)
+	
+- nextcloud-dialogs
+	npm link vdrive-icons @nextcloud/vue
+	npm install
+	npm run build
+	
+- nextcloud-upload
+	npm link vdrive-icons @nextcloud/vue
+	npm install
+	npm run build
+	
+- nextcloud-server:
+	npm link vdrive-icons @nextcloud/vue @nextcloud/upload @nextcloud/dialogs
+	npm install
+	
+- nextcloud-server/apps-extra/richdocuments:
+	npm link vdrive-icons @nextcloud/vue
+	npm install
+	npm run build
+	
+- nextcloud-server/apps-extra/recommendations:
+	npm link vdrive-icons
+	npm install
+	npm run build
+	
+- nextcloud-server/apps-extra/serverinfo:
+	npm link vdrive-icons @nextcloud/vue @nextcloud/upload @nextcloud/dialogs
+	npm install
+	npm run build
+	
+- nextcloud-server/apps-extra/text:
+	npm link vdrive-icons @nextcloud/vue
+	npm install
+	npm run build
+
+////////////////////////////////////////// hướng đẫn dựng môi trường dev (bắt buộc làm trên linux, windown k dev đc):
+
+
+
+3. ở các repo trên, sẽ có 2 lệnh npm run build hoặc npm run watch, khi watch thì lưu file sẽ build lại và crtl shift r ở page sẽ load đc code mới, npm run build đùng để build prod
+icon thêm vào vdrive icon, thêm file svg vào source, sửa các biến fill, fit = currentColor để có css theo màu của component, sau đó chạy npm run build sẽ sinh ra file vue để các repo khác có thể import (lưu ý build xong phải f5 (refresh-from-disk) lại node module nếu dùng webstrom/phpstrom/... đê load đc source thư viện node mới)
+- chạy npm build ở các repo, lưu ý build icon, vue trước nếu có sửa 2 repo này (sửa icon thì build tất, vue cũng build tất) hoặc build chỗ nào dùng
+	
+4. pull repo nextcloud-docker-dev
+- cd vào nextcloud-docker-dev
+- chạy: ./bootstrap.sh (nếu linux thì phải cấp quyền = sudo chmod +x ./bootstrap.sh) lưu ý k cấp quyền 777 vì sẽ đẫn đến lỗi server
+- cấp quyền chmod +x cho các toàn bộ các script .sh ở thư mục scripts
+- chờ script chạy xong (khá lâu, khoản 30p)
+- script xong sẽ sinh 1 file env, sửa biến REPO_PATH_SERVER trỏ vào repo nextcloud, ví dụ: REPO_PATH_SERVER="/home/hung/dev/vdrive/nextcloud-server", sửa SQL=pgsql
+- vào thư mục data/shared, tạo 1 file config.php với nội dung: (nội dung đặt trong dấu """<nội dung>""")
+"""
+<?php
+$CONFIG = [
+    'defaultapp' => 'files',
+    'theme' => 'vdrive',
+];
+"""
+
+docker exec vào bash của container nextcloud chạy 2 lệnh này để cấp quyền call occ:
+
+docker compose exec nextcloud chown www-data:www-data /var/www/html/occ
+docker compose exec nextcloud chmod +x /var/www/html/occ
+
+5. để bật môi trường dev: chạy docker compose up -d nextcloud (docker-compose.yml ở nextcloud-docker-dev)
+truy cập ở đường dẫn: nextcloud.local
+
+/////////////////////////////////////// hướng đẫn build prod (bắt buộc làm trên linux, windown k dev đc):
+pull repo vdrive-aio về
+pull repo nextcloud server vào thư mục vdrive-aio/Container/nextcloud (update source thì pull lại), k dùng repo đã npm i vì sẽ nặng docker image
+ở thư mục aio, build
+	base: (đã build sẵn)
+	docker build --no-cache -f /Container/nextcloud/Dockerfile.base -t <tag> .
+	fetch:
+	docker build --no-cache -f /Container/nextcloud/Dockerfile.fetch -t <tag> .
+test = docker compose ở thư mục manual-install
